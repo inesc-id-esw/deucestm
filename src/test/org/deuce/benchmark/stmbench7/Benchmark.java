@@ -352,7 +352,7 @@ public class Benchmark {
 
     	long endTime = System.currentTimeMillis();
     	elapsedTime = ((double)(endTime - startTime)) / 1000.0;
-    	System.err.println("Benchmark completed.\n");
+    	System.err.println("\nBenchmark completed.\n");
     }
 
     private void checkOpacity() throws InterruptedException {
@@ -394,7 +394,7 @@ public class Benchmark {
     		for(int ttc = 0; ttc <= Parameters.MAX_LOW_TTC; ttc++) {
         		int count = 0;
         		for(BenchThread thread : benchThreads) 
-        			count += thread.operationsTTC[operation.ordinal()][ttc];
+        			count += thread.stats.operationsTTC(operation.ordinal(), ttc);
         		
         		System.out.print(" " + ttc + "," + count);
     		}
@@ -402,7 +402,7 @@ public class Benchmark {
     		for(int logTtcIndex = 0; logTtcIndex < Parameters.HIGH_TTC_ENTRIES; logTtcIndex++) {
     			int count = 0;
     			for(BenchThread thread : benchThreads)
-    				count += thread.operationsHighTTCLog[operation.ordinal()][logTtcIndex];
+    				count += thread.stats.operationsHighTTCLog(operation.ordinal(), logTtcIndex);
     			
     			int ttc = logTtcIndex2Ttc(logTtcIndex);
     			System.out.print(" " + ttc + "," + count);
@@ -490,12 +490,12 @@ public class Benchmark {
 
     private int computeMaxThreadTTC(BenchThread thread, int opNumber) {
     	for(int logTtcIndex = Parameters.HIGH_TTC_ENTRIES - 1; logTtcIndex >= 0; logTtcIndex--) {
-    		if(thread.operationsHighTTCLog[opNumber][logTtcIndex] > 0)
+    		if(thread.stats.operationsHighTTCLog(opNumber, logTtcIndex) > 0)
     			return logTtcIndex2Ttc(logTtcIndex);
     	}
     	
     	for(int ttc = Parameters.MAX_LOW_TTC; ttc >= 0; ttc--) {
-    		if(thread.operationsTTC[opNumber][ttc] > 0) return ttc;
+    		if(thread.stats.operationsTTC(opNumber, ttc) > 0) return ttc;
     	}
     	
     	return 0; // operation never completed with success
