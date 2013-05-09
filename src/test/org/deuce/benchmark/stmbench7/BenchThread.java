@@ -7,7 +7,41 @@ import org.deuce.benchmark.stmbench7.annotations.NonAtomic;
 import org.deuce.benchmark.stmbench7.core.Operation;
 import org.deuce.benchmark.stmbench7.core.RuntimeError;
 import org.deuce.benchmark.stmbench7.core.OperationFailedException;
+import org.deuce.transform.Exclude;
 
+@Exclude
+class ThreadStats{
+	public ThreadStats() {
+		this.operationsTTC = new int[OperationId.values().length][Parameters.MAX_LOW_TTC + 1];
+		this.operationsHighTTCLog = new int[OperationId.values().length][Parameters.HIGH_TTC_ENTRIES];
+	}
+
+	/**
+	 * To support multi-dimensional arrays in the Captured Memory feature
+	 * we cannot access them out of a transactional method due to the huge 
+	 * overhead of unwrapping the encapsulated arrays.
+	 * So, we keep multi-dimensional arrays in private fields and access 
+	 * them through transactional indexers.  
+	 */
+	private int[][] operationsTTC, operationsHighTTCLog;
+
+	public int operationsHighTTCLog(int opNumber, int logTtcIndex){
+		return operationsHighTTCLog[opNumber][logTtcIndex]; 
+	}
+
+	public int operationsTTC(int opNumber, int ttc){
+		return operationsTTC[opNumber][ttc];
+	}  
+
+	public void incOperationsTTC(int operationNumber, int ttc){
+		operationsTTC[operationNumber][ttc]++;
+	}
+
+	public void incOperationsHighTTCLog(int operationNumber, int intLogHighTtc){
+		operationsHighTTCLog[operationNumber][intLogHighTtc]++;
+	}
+}
+ 
 /**
  * A single thread of the STMBench7 benchmark. Executes operations assigned to
  * it one by one, randomly choosing the next operation and respecting the
@@ -22,8 +56,9 @@ public class BenchThread implements Runnable {
 	protected final short myThreadNum;
 
 	public int[] successfulOperations, failedOperations;
-	public int[][] operationsTTC, operationsHighTTCLog;
-
+	
+	protected final ThreadStats  stats = new ThreadStats();
+	
 	public class ReplayLogEntry implements Comparable<ReplayLogEntry> {
 		public final short threadNum;
 		public final int timestamp, result;
@@ -50,8 +85,6 @@ public class BenchThread implements Runnable {
 		this.operationCDF = operationCDF;
 
 		int numOfOperations = OperationId.values().length;
-		operationsTTC = new int[numOfOperations][Parameters.MAX_LOW_TTC + 1];
-		operationsHighTTCLog = new int[numOfOperations][Parameters.HIGH_TTC_ENTRIES];
 		successfulOperations = new int[numOfOperations];
 		failedOperations = new int[numOfOperations];
 		operations = new OperationExecutor[numOfOperations];
@@ -69,12 +102,25 @@ public class BenchThread implements Runnable {
 		createOperations(setup);
 		myThreadNum = 0;
 	}
+	
+	private static final int OPERATION_NR;
+	static{
+	    String opId = System.getProperty("uniqueop");
+	    if(opId != null && !opId.equals("")){
+                OperationId id = OperationId.valueOf(opId); 
+	        System.out.println("********** Unique Operation: " + id );
+	        OPERATION_NR = id.ordinal();
+	    }else{
+	        OPERATION_NR = -1;
+	    }
+	}
 
 	public void run() {
 		int i = 0;
 		while (!stop) {
 			//if (i++ > 55) continue;
-			int operationNumber = getNextOperationNumber();
+		   
+			int operationNumber = OPERATION_NR != -1? OPERATION_NR : getNextOperationNumber();
 
 			OperationType type = OperationId.values()[operationNumber].getType();
 			//if( (type != OperationType.SHORT_TRAVERSAL) ) continue;
@@ -100,14 +146,14 @@ public class BenchThread implements Runnable {
 				successfulOperations[operationNumber]++;
 				int ttc = (int) (endTime - startTime);
 				if (ttc <= Parameters.MAX_LOW_TTC)
-					operationsTTC[operationNumber][ttc]++;
+				        stats.incOperationsTTC(operationNumber, ttc);
 				else {
 					double logHighTtc = (Math.log(ttc) - Math
 							.log(Parameters.MAX_LOW_TTC + 1))
 							/ Math.log(Parameters.HIGH_TTC_LOG_BASE);
 					int intLogHighTtc = Math.min((int) logHighTtc,
 							Parameters.HIGH_TTC_ENTRIES - 1);
-					operationsHighTTCLog[operationNumber][intLogHighTtc]++;
+					stats.incOperationsHighTTCLog(operationNumber, intLogHighTtc);
 				}
 			} catch (OperationFailedException e) {
 				//System.out.println("failed");
@@ -123,7 +169,8 @@ public class BenchThread implements Runnable {
 				//System.out.println("ts: " + newEntry.timestamp);
 			}
 		}
-		System.err.println("Thread #" + myThreadNum + " finished.");
+		System.err.print("#" + myThreadNum + " ");
+		System.err.flush();
 		//i = 0;
 		//for (ReplayLogEntry entry : replayLog)
 		//	System.out.println(i++ + " % " + OperationId.values()[entry.opNum]
