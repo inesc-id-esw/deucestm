@@ -103,14 +103,14 @@ public class Normal {
    */
   public static void work(int myId, GlobalArgs args) {
     int CHUNK=3;
-    float[][] feature = args.feature;
+    // float[][] feature = args.feature;
     int nfeatures = args.nfeatures;
     int npoints = args.npoints;
     int nclusters = args.nclusters;
     int[] membership = args.membership;
-    float[][] clusters = args.clusters;
+    // float[][] clusters = args.clusters;
     int[] new_centers_len = args.new_centers_len;
-    float[][] new_centers = args.new_centers;
+    // float[][] new_centers = args.new_centers;
     float delta = 0.0f;
     int index, start, stop;
 
@@ -120,9 +120,9 @@ public class Normal {
       stop = (((start + CHUNK) < npoints) ? (start + CHUNK) : npoints);
 
       for (int i = start; i < stop; i++) {
-        index = Common.common_findNearestPoint(feature[i],
+        index = Common.common_findNearestPoint(args.feature(i),
             nfeatures,
-            clusters,
+            args,
             nclusters);
         /*
          * If membership changes, increase delta by 1.
@@ -137,7 +137,7 @@ public class Normal {
         membership[i] = index;
 
         /* Update new cluster centers : sum of objects located within */
-	atomicMethodOne(feature, nfeatures, new_centers_len, new_centers, index, i);
+	atomicMethodOne(args, nfeatures, new_centers_len, index, i);
       }
 
       /* Update task queue */
@@ -169,12 +169,12 @@ private static int atomicMethodTwo(GlobalArgs args, int CHUNK) {
 }
 
   @Atomic
-private static void atomicMethodOne(float[][] feature, int nfeatures,
-		int[] new_centers_len, float[][] new_centers, int index, int i) {
+private static void atomicMethodOne(GlobalArgs args, int nfeatures,
+		int[] new_centers_len, int index, int i) {
 	{
           new_centers_len[index] = new_centers_len[index] + 1;
           for (int j = 0; j < nfeatures; j++) {
-            new_centers[index][j] = new_centers[index][j] + feature[i][j];
+            args.set_new_centers(index, j, args.new_centers(index, j) + args.feature(i, j));
           }
 	}
 }
