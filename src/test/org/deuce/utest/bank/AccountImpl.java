@@ -1,5 +1,7 @@
 package org.deuce.utest.bank;
 
+import org.deuce.Atomic;
+
 public class AccountImpl implements Account {
 
 	private int amount = 0;
@@ -17,7 +19,7 @@ public class AccountImpl implements Account {
 		return accountNumber;
 	}
 
-	public int getBalance() {
+	@Atomic public int getBalance() {
 		return amount;
 	}
 

@@ -89,8 +89,8 @@ public class GetStartLists {
 
 
       for (i = lss.i_start; i < lss.i_stop; i++) {
-        if (gsl.GPtr.intWeight[i] > maxWeight) {
-          maxWeight = gsl.GPtr.intWeight[i];
+        if (gsl.GPtr.intWeight(i) > maxWeight) {
+          maxWeight = gsl.GPtr.intWeight(i);
         }
       }
 
@@ -109,28 +109,28 @@ public class GetStartLists {
       //
       // Allocate mem. for temp edge list for each thread
       //
-      int numTmpEdge = ( 5 + (int) (Math.ceil(1.5*(gsl.GPtr.numIntEdges)/glb.MAX_INT_WEIGHT)));
+      int numTmpEdge = ( 5 + (int) (Math.ceil(1.5*(gsl.GPtr.numIntEdges())/glb.MAX_INT_WEIGHT)));
       Edge[] tmpEdgeList = new Edge[numTmpEdge];
 
       int i_edgeCounter = 0;
 
       for (i = lss.i_start; i < lss.i_stop; i++) {
 
-        if (gsl.GPtr.intWeight[i] == maxWeight) {
+        if (gsl.GPtr.intWeight(i) == maxWeight) {
 
           // Find the corresponding endVertex 
           int j;
-          for (j = 0; j < gsl.GPtr.numDirectedEdges; j++) {
-            if (gsl.GPtr.paralEdgeIndex[j] > i) {
+          for (j = 0; j < gsl.GPtr.numDirectedEdges(); j++) {
+            if (gsl.GPtr.paralEdgeIndex(j) > i) {
               break;
             }
           }
-          tmpEdgeList[i_edgeCounter].endVertex = gsl.GPtr.outVertexList[j-1];
+          tmpEdgeList[i_edgeCounter].endVertex = gsl.GPtr.outVertexList(j-1);
           tmpEdgeList[i_edgeCounter].edgeNum = j-1;
 
           int t;
-          for (t = 0; t < gsl.GPtr.numVertices; t++) {
-            if (gsl.GPtr.outVertexIndex[t] > j-1) {
+          for (t = 0; t < gsl.GPtr.numVertices(); t++) {
+            if (gsl.GPtr.outVertexIndex(t) > j-1) {
               break;
             }
           }
@@ -203,7 +203,7 @@ public class GetStartLists {
 
       i_edgeCounter = 0;
 
-      CreatePartition.createPartition(0, gsl.GPtr.numStrEdges, myId, numThread, lss);
+      CreatePartition.createPartition(0, gsl.GPtr.numStrEdges(), myId, numThread, lss);
 
       for (i = lss.i_start; i < lss.i_stop; i++) {
 

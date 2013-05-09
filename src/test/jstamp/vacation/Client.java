@@ -1,6 +1,7 @@
 package jstamp.vacation;
 
 import org.deuce.Atomic;
+import org.deuce.transform.Exclude;
 
 /* =============================================================================
  *
@@ -72,8 +73,35 @@ import org.deuce.Atomic;
  * =============================================================================
  */
 
-
+@Exclude
 public class Client extends Thread {
+    
+    ClientTarget target;
+
+    public Client() {}
+    /* =============================================================================
+     * client_alloc
+     * -- Returns NULL on failure
+     * =============================================================================
+     */
+    public Client(int id,
+            Manager managerPtr,
+            int numOperation,
+            int numQueryPerTransaction,
+            int queryRange,
+            int percentUser) {
+        target = new ClientTarget(id, managerPtr, numOperation, numQueryPerTransaction, queryRange, percentUser);
+
+    }
+    
+    @Override
+    public void run() {
+        target.run();
+    }
+}
+
+class ClientTarget{
+    
   int id;
   Manager managerPtr;
   Random randomPtr;
@@ -82,14 +110,13 @@ public class Client extends Thread {
   int queryRange;
   int percentUser;
 
-  public Client() {}
 
 /* =============================================================================
  * client_alloc
  * -- Returns NULL on failure
  * =============================================================================
  */
-  public Client(int id,
+  public ClientTarget(int id,
 		Manager managerPtr,
 		int numOperation,
 		int numQueryPerTransaction,
