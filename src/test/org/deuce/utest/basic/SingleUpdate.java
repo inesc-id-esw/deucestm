@@ -8,6 +8,15 @@ import org.deuce.Atomic;
 
 public class SingleUpdate  extends TestCase{
 	
+	public static void main(String [] args){
+		/*
+		SingleUpdate s = new SingleUpdate();
+		s.setUp();
+		s.testSimpleAdd();
+		*/
+		junit.textui.TestRunner.run(SingleUpdate.class);
+	}
+	
 	final public static boolean f = false; 
 
 	private int intVar;
@@ -21,6 +30,19 @@ public class SingleUpdate  extends TestCase{
 	private double[] doubleArrVar;
 	private Object[] objectArrvar;
 	private String[] stringArrvar;
+	
+        @Atomic int intVar(){return intVar;}
+        @Atomic long longVar(){return longVar;}
+        @Atomic double doubleVar(){return doubleVar;}
+        @Atomic Object objectVar(){return objectVar;}
+        @Atomic String stringVar(){return stringVar;}
+
+        @Atomic int intArrVar(int idx){return intArrVar[idx];}
+        @Atomic long longArrVar(int idx){return longArrVar[idx];}
+        @Atomic double doubleArrVar(int idx){return doubleArrVar[idx];}
+        @Atomic Object objectArrvar(int idx){return objectArrvar[idx];}
+        @Atomic String stringArrvar(int idx){return stringArrvar[idx];}
+
 	
     @Override
     public void setUp() { 
@@ -40,17 +62,17 @@ public class SingleUpdate  extends TestCase{
 	public void testSimpleAdd() {
 		atomicSingleUpdate();
 		
-		Assert.assertEquals(intVar, 1);
-		Assert.assertEquals(longVar, 1);
-		Assert.assertEquals(doubleVar, 1.0);
-		Assert.assertNotNull(objectVar);
-		Assert.assertEquals(stringVar, "a");
+		Assert.assertEquals(intVar(), 1);
+		Assert.assertEquals(longVar(), 1);
+		Assert.assertEquals(doubleVar(), 1.0);
+		Assert.assertNotNull(objectVar());
+		Assert.assertEquals(stringVar(), "a");
 		
-		Assert.assertEquals(intArrVar[0], 1);
-		Assert.assertEquals(longArrVar[0], 1);
-		Assert.assertEquals(doubleArrVar[0], 1.0);
-		Assert.assertNotNull(objectArrvar[0]);
-		Assert.assertEquals(stringArrvar[0], "a");
+		Assert.assertEquals(intArrVar(0), 1);
+		Assert.assertEquals(longArrVar(0), 1);
+		Assert.assertEquals(doubleArrVar(0), 1.0);
+		Assert.assertNotNull(objectArrvar(0));
+		Assert.assertEquals(stringArrvar(0), "a");
 		
 	}
 	

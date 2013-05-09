@@ -1,5 +1,7 @@
 package jstamp.KMeans;
 
+import org.deuce.Atomic;
+
 /* ==============================================================================
  *
  * GlobalArgs.java
@@ -78,5 +80,30 @@ public class GlobalArgs {
   public float global_delta;
 
   long global_time;
+
+  @Atomic
+  public float[] feature(int i) {
+      return feature[i];
+  }
+
+  @Atomic
+  public float feature(int i, int j) {
+      return feature[i][j];
+  }
+
+  @Atomic
+  public float[] clusters(int i) {
+      return clusters[i];
+  }
+
+  @Atomic
+  public float new_centers(int index, int j) {
+      return new_centers[index][j];
+  }
+  
+  @Atomic
+  public void set_new_centers(int index, int j, float val) {
+      new_centers[index][j] = val;
+  }
 
 }

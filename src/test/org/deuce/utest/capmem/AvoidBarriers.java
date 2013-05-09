@@ -5,10 +5,11 @@ import java.lang.reflect.Field;
 import org.deuce.transform.Exclude;
 
 @Exclude
-class AvoidBarriers{
+public class AvoidBarriers{
 	public static Object getObjectValue(Object target, String fieldName){
 		try {
 			Field f = target.getClass().getDeclaredField(fieldName);
+			f.setAccessible(true);
 			return f.get(target);
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException(e);
@@ -24,6 +25,7 @@ class AvoidBarriers{
 	public static int getIntValue(Object target, String fieldName){
 		try {
 			Field f = target.getClass().getDeclaredField(fieldName);
+			f.setAccessible(true);
 			return f.getInt(target);
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException(e);
@@ -38,6 +40,7 @@ class AvoidBarriers{
 	public static byte getByteValue(Object target, String fieldName){
 		try {
 			Field f = target.getClass().getDeclaredField(fieldName);
+			f.setAccessible(true);
 			return f.getByte(target);
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException(e);
@@ -52,6 +55,7 @@ class AvoidBarriers{
 	public static short getShortValue(Object target, String fieldName){
 		try {
 			Field f = target.getClass().getDeclaredField(fieldName);
+			f.setAccessible(true);
 			return f.getShort(target);
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException(e);
@@ -66,6 +70,7 @@ class AvoidBarriers{
 	public static long getLongValue(Object target, String fieldName){
 		try {
 			Field f = target.getClass().getDeclaredField(fieldName);
+			f.setAccessible(true);
 			return f.getLong(target);
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException(e);

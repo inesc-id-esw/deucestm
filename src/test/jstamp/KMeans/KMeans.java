@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.deuce.Atomic;
+
 /* =============================================================================
  *
  * kmeans.java
@@ -86,7 +88,24 @@ import java.io.InputStream;
  * =============================================================================
  */
 
-public class KMeans extends Thread {
+class KMeansThread extends Thread {
+    KMeans target;
+    
+    public KMeansThread() {
+        target = new KMeans();
+    }
+
+    public KMeansThread(int threadid, GlobalArgs g_args) {
+        target = new KMeans(threadid, g_args);
+    }
+    
+    @Override
+    public void run() {
+        target.run();
+    }
+}
+
+public class KMeans{
   /**
    * User input for max clusters
    **/
@@ -143,6 +162,11 @@ public class KMeans extends Thread {
    **/
   float[][] cluster_centres;
   
+  @Atomic
+  private float cluster_centres(int i, int j) {
+      return cluster_centres[i][j];
+  }
+
   public KMeans() {
     max_nclusters = 13;
     min_nclusters = 4;
@@ -244,13 +268,13 @@ public class KMeans extends Thread {
     int nloops = 1;
     int len = kms.max_nclusters - kms.min_nclusters + 1;
 
-    KMeans[] km = new KMeans[nthreads];
+    KMeansThread[] km = new KMeansThread[nthreads];
     GlobalArgs g_args = new GlobalArgs();
     g_args.nthreads = nthreads;
 
     /* Create and Start Threads */
     for(int i = 1; i<nthreads; i++) {
-      km[i] = new KMeans(i, g_args);
+      km[i] = new KMeansThread(i, g_args);
     }
 
     for(int i = 1; i<nthreads; i++) {
@@ -288,7 +312,7 @@ public class KMeans extends Thread {
       for (int i = 0; i < kms.best_nclusters; i++) {
         System.out.print(i + " ");
         for (int j = 0; j < numAttributes; j++) {
-          System.out.print(kms.cluster_centres[i][j] + " ");
+          System.out.print(kms.cluster_centres(i, j) + " ");
         }
         System.out.println("\n");
       }
@@ -309,7 +333,7 @@ public class KMeans extends Thread {
       }
   }
 
-  public static void parseCmdLine(String args[], KMeans km) {
+public static void parseCmdLine(String args[], KMeans km) {
     int i = 0;
     String arg;
     while (i < args.length && args[i].startsWith("-")) {

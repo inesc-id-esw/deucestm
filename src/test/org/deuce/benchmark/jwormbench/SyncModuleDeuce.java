@@ -3,23 +3,22 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.deuce.transform.Exclude;
-
 import jwormbench.core.IWorld;
 import jwormbench.core.WormBench;
-import jwormbench.defaults.World;
-import jwormbench.defaults.DefaultNodeFactory;
 import jwormbench.defaults.DefaultCoordinateFactory;
 import jwormbench.defaults.DefaultOperationFactory;
 import jwormbench.defaults.DefaultWormFactory;
-import jwormbench.factories.INodeFactory;
+import jwormbench.defaults.World;
 import jwormbench.factories.ICoordinateFactory;
+import jwormbench.factories.INodeFactory;
 import jwormbench.factories.IStepFactory;
 import jwormbench.factories.IWormFactory;
-import jwormbench.setup.WorldFileLoader;
 import jwormbench.setup.IWormsSetup;
 import jwormbench.setup.StepsFileLoader;
+import jwormbench.setup.WorldFileLoader;
 import jwormbench.setup.WormsFileLoader;
+
+import org.deuce.transform.Exclude;
 
 @Exclude
 class LogFormatter extends Formatter{
@@ -37,7 +36,7 @@ public class SyncModuleDeuce{
 		// World
 		//
 		final ICoordinateFactory cordFac =  new DefaultCoordinateFactory();
-		final INodeFactory nodeFac = new DefaultNodeFactory();
+		final INodeFactory nodeFac = new DeuceNodeFactory();
 		final IWorld world = new World(
 				new WorldFileLoader(
 						configWorld, nodeFac));
