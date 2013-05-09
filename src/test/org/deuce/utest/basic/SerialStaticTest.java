@@ -14,6 +14,17 @@ public class SerialStaticTest extends TestCase{
 	private static int var3;
 	private static int var4;
 	
+	/*
+	 * The JVSTM does not store transactional fields in place and 
+	 * therefore we should read through STM barriers to get 
+	 * consistent values. 
+	 */
+	@Atomic static int var0(){return var0;}
+	@Atomic static int var1(){return var1;}
+	@Atomic static int var2(){return var2;}
+	@Atomic static int var3(){return var3;}
+	@Atomic static int var4(){return var4;}
+	
     @Override
 	public void setUp() { 
     	var0 = 0;
@@ -50,7 +61,7 @@ public class SerialStaticTest extends TestCase{
 	
 	public void testSingleWrite() {
 		atomicSingleWrite();
-		Assert.assertEquals(10, var0);
+		Assert.assertEquals(10, var0());
 	}
 	
 	@Atomic

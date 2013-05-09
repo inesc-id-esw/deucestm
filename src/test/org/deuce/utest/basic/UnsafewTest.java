@@ -16,32 +16,32 @@ public class UnsafewTest extends TestCase{
 		try{
 			target.foo1();
 		}catch(AbortTransactionException e){}
-		Assert.assertEquals(10, target.i);
-		Assert.assertEquals(0, target.x);
+		Assert.assertEquals(10, target.i());
+		Assert.assertEquals(0, target.x());
 	}
 
 	public void testUnsafeWithAtomic() {
 		try{
 			target.foo2();
 		}catch(AbortTransactionException e){}
-		Assert.assertEquals(20, target.i);
-		Assert.assertEquals(0, target.x);
+		Assert.assertEquals(20, target.i());
+		Assert.assertEquals(0, target.x());
 	}
 
 	public void testRepeatUnsafe() {
 		try{
 			target.foo3();
 		}catch(TransactionException e){}
-		Assert.assertEquals(30, target.i);
-		Assert.assertEquals(0, target.x);
+		Assert.assertEquals(30, target.i());
+		Assert.assertEquals(0, target.x());
 	}
 
 	public void testAtomicUnsafe() {
 		try{
 			target.foo4();
 		}catch(TransactionException e){}
-		Assert.assertEquals(40, target.i);
-		Assert.assertEquals(0, target.x);
+		Assert.assertEquals(40, target.i());
+		Assert.assertEquals(0, target.x());
 	}
 }
 
@@ -63,6 +63,14 @@ class UnsafewTestTarget{
 
 	int i = 0;
 	int x = 0;
+
+	/*
+	 * The JVSTM does NOT store transactional fields in place and 
+	 * therefore we should read through STM barriers to get 
+	 * consistent values. 
+	 */
+	@Atomic int i(){return i;}
+	@Atomic int x(){return x;}
 
 	@Atomic
 	void foo1(){
@@ -87,7 +95,7 @@ class UnsafewTestTarget{
 	@Unsafe
 	private void unsafe2(){
 		atomic();
-		i += 10;
+		i = i() + 10;
 	}
 
 	@Atomic

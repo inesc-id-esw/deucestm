@@ -14,10 +14,19 @@ public class StaticBlockTest extends TestCase{
 
 	static int x = 3;
 	static int y = 6;
+	/*
+        * The JVSTM does not store transactional fields in place and 
+        * therefore we should read through STM barriers to get 
+        * consistent values. 
+        */
+       @Atomic int y(){return y;}
+       @Atomic int x(){return x;}
+
+
 	public void teststaticBlock() throws Exception {
 		staticBlock(5);
-		assertEquals(24, x);
-		assertEquals(6, y);
+		assertEquals(24, x());
+		assertEquals(6, y());
 	}
 	
 	@Atomic
