@@ -1,5 +1,8 @@
 package jstamp.vacation;
 
+import org.deuce.transform.Exclude;
+
+@Exclude
 public class Random {
   long[] mt; 
   int mti;

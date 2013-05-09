@@ -109,7 +109,7 @@ public class GetUserParameters {
         //check options
         if(arg.equals("-i")) {
           if(i < args.length) {
-            glb.PROB_INTERCL_EDGES = new Integer(args[i++]).floatValue();
+            glb.PROB_INTERCL_EDGES = new Double(args[i++]).floatValue();
           }
         } else if(arg.equals("-k")) {
           if(i < args.length) {
@@ -137,7 +137,7 @@ public class GetUserParameters {
           }
         } else if(arg.equals("-u")) {
           if(i < args.length) {
-            glb.PROB_UNIDIRECTIONAL = new Integer(args[i++]).floatValue();
+            glb.PROB_UNIDIRECTIONAL = new Double(args[i++]).floatValue();
           }
         } else if(arg.equals("-w")) {
           if(i < args.length) {

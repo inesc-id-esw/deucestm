@@ -3,6 +3,7 @@ package jstamp.KMeans;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /* =============================================================================
  *
@@ -199,8 +200,7 @@ public class KMeans extends Thread {
       System.out.println("TODO: Unimplemented Binary file option\n");
       System.exit(0);
     }
-
-    FileInputStream inputFile = new FileInputStream(kms.filename);
+    InputStream inputFile = KMeans.class.getResourceAsStream(kms.filename);
     byte b[] = new byte[MAX_LINE_LENGTH];
     int n;
     while ((n = inputFile.read(b)) != -1) {
@@ -210,7 +210,7 @@ public class KMeans extends Thread {
       }
     }
     inputFile.close();
-    inputFile = new FileInputStream(kms.filename);
+    inputFile = KMeans.class.getResourceAsStream(kms.filename);
     
     String line = null;
     if((line = new DataInputStream(inputFile).readLine()) != null) {
@@ -370,8 +370,8 @@ public class KMeans extends Thread {
  * @throws IOException 
  * @throws NumberFormatException 
    **/
-  public static void readFromFile(FileInputStream inputFile, String filename, float[][] buf, int MAX_LINE_LENGTH) throws NumberFormatException, IOException {
-    inputFile = new FileInputStream(filename);
+  public static void readFromFile(InputStream inputFile, String filename, float[][] buf, int MAX_LINE_LENGTH) throws NumberFormatException, IOException {
+    inputFile = KMeans.class.getResourceAsStream(filename);
     int j;
     int i = 0;
 
