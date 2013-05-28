@@ -3,7 +3,7 @@
     <groupId>org.deuce</groupId>
     <artifactId>deucestm-licm</artifactId>
     <packaging>jar</packaging>
-    <version>1.3.0</version>
+    <version>1.3.1-SNAPSHOT</version>
     <name>Deuce STM LICM (Lightweight identification of captured memory )</name>
     <url>http://inesc-id-esw.github.io/DeuceSTM</url>
 
@@ -22,7 +22,7 @@
         <connection>scm:git:git@github.com:inesc-id-esw/DeuceSTM.git</connection>
         <developerConnection>scm:git:git@github.com:inesc-id-esw/DeuceSTM.git</developerConnection>
         <url>http://inesc-id-esw.github.io/DeuceSTM</url>
-        <tag>deucestm-licm-1.3.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <build>
