@@ -1,0 +1,351 @@
+<?xml version="1.0"?>
+
+<project name="Deuce Benchmarks" default="benchmarks-capmem" basedir=".">
+
+	<import file="build.xml" />
+
+	<target name="benchmarks-nocap" depends="tests-jar">
+		<antcall target="bench-nocap-bench7" />
+		<antcall target="bench-nocap-jwormbench" />
+		<antcall target="bench-nocap-vacation" />
+		<antcall target="bench-nocap-intruder" />
+		<antcall target="bench-nocap-kmeans" />
+		<antcall target="bench-nocap-ssca2" />
+		<antcall target="bench-nocap-genome" />
+	</target>
+
+	<target name="benchmarks-capmem" depends="tests-jar">
+		<antcall target="bench-capmem-bench7" />
+		<antcall target="bench-capmem-jwormbench" />
+		<antcall target="bench-capmem-vacation" />
+		<antcall target="bench-capmem-intruder" />
+		<antcall target="bench-capmem-kmeans" />
+		<antcall target="bench-capmem-ssca2" />
+		<antcall target="bench-capmem-genome" />
+	</target>
+
+	<target name="benchmarks-jvstm" depends="tests-jar">
+		<antcall target="bench-jvstm-bench7" />
+		<antcall target="bench-jvstm-jwormbench" />
+		<antcall target="bench-jvstm-vacation" />
+		<antcall target="bench-jvstm-intruder" />
+		<antcall target="bench-jvstm-kmeans" />
+		<antcall target="bench-jvstm-ssca2" />
+		<antcall target="bench-jvstm-genome" />
+	</target>
+	
+	<!--++++ Deuce instrumentation with NO Captured Memory Analysis support  ++++-->
+
+	<target name="bench-nocap-bench7" depends="instrument-rt">
+		<antcall target="-bench-bench7">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce.jar${path.separator}${basedir}/bin/deuceAgent.jar" />
+			<param name="delegator" value="" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<target name="bench-nocap-jwormbench">
+		<antcall target="-bench-jwormbench">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="" />
+			<param name="delegator" value="" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<target name="bench-nocap-vacation">
+		<antcall target="-bench-vacation">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="" />
+			<param name="delegator" value="" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<target name="bench-nocap-intruder">
+		<antcall target="-bench-intruder">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="" />
+			<param name="delegator" value="" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<target name="bench-nocap-kmeans">
+		<antcall target="-bench-kmeans">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="" />
+			<param name="delegator" value="" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<target name="bench-nocap-ssca2">
+		<antcall target="-bench-ssca2">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="" />
+			<param name="delegator" value="" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<target name="bench-nocap-genome" depends="instrument-rt">
+		<antcall target="-bench-genome">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce.jar${path.separator}${basedir}/bin/deuceAgent.jar" />
+			<param name="delegator" value="" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<!--++++ Deuce instrumentation with Captured Memory Analysis support  ++++-->
+
+	<target name="bench-capmem-bench7" depends="instrument-rt-capmem-full">
+		<antcall target="-bench-bench7">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-capmem-full.jar${path.separator}${basedir}/bin/deuceAgent.jar" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
+			<param name="capmem" value="-Dorg.deuce.capmem=full" />
+		</antcall>
+	</target>
+
+	<target name="bench-capmem-jwormbench">
+		<antcall target="-bench-jwormbench">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
+			<param name="capmem" value="-Dorg.deuce.capmem=full" />
+		</antcall>
+	</target>
+
+	<target name="bench-capmem-vacation">
+		<antcall target="-bench-vacation">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="-Demptyarg=none" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
+			<param name="capmem" value="-Dorg.deuce.capmem=full" />
+		</antcall>
+	</target>
+
+	<target name="bench-capmem-intruder">
+		<antcall target="-bench-intruder">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="-Demptyarg=none" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
+			<param name="capmem" value="-Dorg.deuce.capmem=full" />
+		</antcall>
+	</target>
+
+	<target name="bench-capmem-kmeans">
+		<antcall target="-bench-kmeans">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="-Demptyarg=none" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<target name="bench-capmem-ssca2">
+		<antcall target="-bench-ssca2">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="-Demptyarg=none" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
+			<param name="capmem" value="" />
+		</antcall>
+	</target>
+
+	<target name="bench-capmem-genome" depends="instrument-rt-capmem-full">
+		<antcall target="-bench-genome">
+			<param name="stm" value="org.deuce.transaction.lsa.Context" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-capmem-full.jar${path.separator}${basedir}/bin/deuceAgent.jar" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
+			<param name="capmem" value="-Dorg.deuce.capmem=full" />
+		</antcall>
+	</target>
+	
+	<!--++++ Deuce with JVSTM and Captured Memory Analysis support  ++++-->
+
+	<target name="bench-jvstm-bench7" depends="instrument-rt-jvstm">
+		<antcall target="-bench-bench7">
+			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-jvstm.jar${path.separator}${basedir}/bin/deuceAgent.jar${path.separator}${basedir}/lib/jvstm-2.0.jar"/>
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
+			<param name="capmem" value="-Djvstm.capmem=true" />
+		</antcall>
+	</target>
+
+	<target name="bench-jvstm-jwormbench">
+		<antcall target="-bench-jwormbench">
+			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
+			<param name="jvm.rt" value="" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
+			<param name="capmem" value="-Djvstm.capmem=true" />
+		</antcall>
+	</target>
+
+	<target name="bench-jvstm-vacation">
+		<antcall target="-bench-vacation">
+			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
+			<param name="jvm.rt" value="-Demptyarg=none" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
+			<param name="capmem" value="-Djvstm.capmem=true" />
+		</antcall>
+	</target>
+
+	<target name="bench-jvstm-intruder">
+		<antcall target="-bench-intruder">
+			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
+			<param name="jvm.rt" value="-Demptyarg=none" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
+			<param name="capmem" value="-Djvstm.capmem=true" />
+		</antcall>
+	</target>
+
+	<target name="bench-jvstm-kmeans">
+		<antcall target="-bench-kmeans">
+			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
+			<param name="jvm.rt" value="-Demptyarg=none" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
+			<param name="capmem" value="-Djvstm.capmem=true" />
+		</antcall>
+	</target>
+
+	<target name="bench-jvstm-ssca2">
+		<antcall target="-bench-ssca2">
+			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
+			<param name="jvm.rt" value="-Demptyarg=none" />
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
+			<param name="capmem" value="-Djvstm.capmem=true" />
+		</antcall>
+	</target>
+
+	<target name="bench-jvstm-genome" depends="instrument-rt-jvstm">
+		<antcall target="-bench-genome">
+			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-jvstm.jar${path.separator}${basedir}/bin/deuceAgent.jar${path.separator}${basedir}/lib/jvstm-2.0.jar"/>
+			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
+			<param name="capmem" value="-Djvstm.capmem=true" />
+		</antcall>
+	</target>
+
+	<!--++++++++++ BENCHMARKS  ++++++++++-->
+
+	<target name="-bench-bench7" depends="--find-tests-jar,--available-procs,--available-mem">
+		<echo message="************* StmBench7" />
+		<antcall target="--no-tests-jar" />
+		<antcall target="--bench-target">
+			<param name="jvm.mem" value="-Xmx${available.mem}M" />
+			<param name="target.classname" value="org.deuce.benchmark.stmbench7.Benchmark" />
+			<param name="exclude" value="java.lang.String,org.deuce.benchmark.stmbench7.ThreadRandom,java.lang.System,sun.reflect.*,java.lang.StringBuilder" />
+			<param name="bench.args" value="-g stm -s org.deuce.benchmark.stmbench7.impl.deucestm.DeuceSTMInitializer -t '${nr.of.processors}' -w r --no-traversals --no-sms -l 10" />
+		</antcall>
+	</target>
+
+	<target name="-bench-jwormbench" depends="--find-tests-jar,--available-procs">
+		<echo message="************* JWormBench" />
+		<antcall target="--no-tests-jar" />
+		<antcall target="--bench-target">
+			<param name="jvm.mem" value="-Demptyarg=none" />
+			<param name="target.classname" value="org.deuce.benchmark.jwormbench.RunJWormBench" />
+			<param name="exclude" value="jwormbench.defaults.World,jwormbench.core.IWorld,java.lang.Integer,java.lang.System,jvstm.*" />
+			<param name="bench.args" value="512 '${nr.of.processors}' 22 deuce" />
+		</antcall>
+	</target>
+
+	<target name="-bench-vacation" depends="--find-tests-jar,--available-procs">
+		<echo message="************* STAMP Vacation" />
+		<antcall target="--no-tests-jar" />
+		<antcall target="--bench-target">
+			<param name="jvm.mem" value="-Demptyarg=none" />
+			<param name="target.classname" value="jstamp.vacation.Vacation" />
+			<param name="exclude" value="java.lang.System,jstamp.vacation.Random,jvstm.*" />
+			<param name="bench.args" value="-c '${nr.of.processors}' -n 256 -q 90 -u 98 -r 262144 -t 65536" />
+		</antcall>
+	</target>
+
+	<target name="-bench-intruder" depends="--find-tests-jar,--available-procs">
+		<echo message="************* STAMP Intruder" />
+		<antcall target="--no-tests-jar" />
+		<antcall target="--bench-target">
+			<param name="jvm.mem" value="-Demptyarg=none" />
+			<param name="target.classname" value="jstamp.intruder.Intruder" />
+			<param name="exclude" value="java.lang.System,java.io.PrintStream,jvstm.*" />
+			<param name="bench.args" value="-t '${nr.of.processors}' -a 10 -l 116 -n 4096 -s 1" />
+		</antcall>
+	</target>
+
+	<target name="-bench-kmeans" depends="--find-tests-jar,--available-procs">
+		<echo message="************* STAMP Kmeans" />
+		<antcall target="--no-tests-jar" />
+		<antcall target="--bench-target">
+			<param name="jvm.mem" value="-Demptyarg=none" />
+			<param name="target.classname" value="jstamp.KMeans.KMeans" />
+			<param name="exclude" value="java.lang.System,sun.reflect.*,jvstm.*" />
+			<param name="bench.args" value="-nthreads '${nr.of.processors}' -m 15 -n 15 -t 0.00001 -i /jstamp/KMeans/inputs/random-n65536-d32-c16.txt " />
+		</antcall>
+	</target>
+
+	<target name="-bench-ssca2" depends="--find-tests-jar,--available-procs,--available-mem">
+		<echo message="************* STAMP SSCA2" />
+		<antcall target="--no-tests-jar" />
+		<antcall target="--bench-target">
+			<param name="jvm.mem" value="-Xmx${available.mem}M" />
+			<param name="target.classname" value="jstamp.ssca2.SSCA2" />
+			<param name="exclude" value="jvstm.*,sun.reflect.*,java.lang.System,java.lang.Math,jstamp.ssca2.Random" />
+			<param name="bench.args" value="-t '${nr.of.processors}' -s 13 -i 1.0 -u 1.0 -l 3 -p 3" />
+		</antcall>
+	</target>
+
+	<target name="-bench-genome" depends="--find-tests-jar,--available-procs,--available-mem">
+		<echo message="************* STAMP Genome" />
+		<antcall target="--no-tests-jar" />
+		<antcall target="--bench-target">
+			<param name="jvm.mem" value="-Xmx${available.mem}M" />
+			<param name="target.classname" value="jstamp.genome.Genome" />
+			<param name="exclude" value="jvstm.*,java.lang.System" />
+			<param name="bench.args" value="-t '${nr.of.processors}' -g 16384 -s 64 -n 262144" />
+		</antcall>
+	</target>
+
+	<target name="--bench-target" if="tests.jar.present">
+		<java fork="true" classname="${target.classname}">
+			<classpath path="${basedir}/bin/deuceTests.jar:${basedir}/lib/jwormbench.jar:${basedir}/lib/jvstm-2.0.jar" />
+			<jvmarg value="${jvm.rt}" />
+			<jvmarg value="${jvm.mem}" />
+			<jvmarg value="-ea" />
+			<jvmarg value="-javaagent:${basedir}/bin/deuceAgent.jar" />
+			<sysproperty key="org.deuce.transaction.contextClass" value="${stm}" />
+			<sysproperty key="org.deuce.exclude" value="${exclude}" />
+			<sysproperty key="java.util.logging.config.file" value="${basedir}/config/logging-tests.properties"/>
+			<jvmarg value="${delegator}" />
+			<jvmarg value="${capmem}" />
+			<sysproperty key="jvstm.aom.reversion" value="true" /> <!-- Specific property of JVSTM to enable AOM - adaptive object metadata -->
+			<sysproperty key="org.deuce.transaction.jvstm.rohint" value="true"/> <!-- Specific property of JVSTM to enable RO transactions -->
+			<arg line="${bench.args}" />
+		</java>
+	</target>
+
+	<target name="--no-tests-jar" unless="tests.jar.present">
+		<fail message="deuceTests.jar not found in bin dir: ${basedir}/bin/" />
+	</target>
+
+	<target name="--find-tests-jar">
+		<available file="${basedir}/bin/deuceTests.jar" property="tests.jar.present" />
+	</target>
+
+	<target name="--available-procs">
+		<java classname="org.deuce.benchmark.AvailableProcs" outputproperty="nr.of.processors">
+			<classpath location="${basedir}/bin/deuceTests.jar" />
+		</java>
+		<echo>Available processors: '${nr.of.processors}'</echo>
+	</target>
+
+	<target name="--available-mem">
+		<java classname="org.deuce.benchmark.AvailableMem" outputproperty="available.mem">
+			<classpath location="${basedir}/bin/deuceTests.jar" />
+		</java>
+		<echo>Available memory: '${available.mem}'</echo>
+	</target>
+
+</project>

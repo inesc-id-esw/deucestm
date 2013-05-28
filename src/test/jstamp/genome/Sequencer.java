@@ -111,7 +111,8 @@ public class Sequencer {
       atomicMethodOne(uniqueSegmentsPtr, segmentsContentsPtr, i, i_stop,
 			CHUNK_STEP1);
     }
-
+    System.out.println("Finished Step 1");
+    
     Barrier.enterBarrier();
 
     /*
@@ -205,7 +206,7 @@ public class Sequencer {
 				constructEntryPtr);
       }
     }
-
+    System.out.println("Finished Step 4");
     Barrier.enterBarrier();
 
     /*
@@ -252,11 +253,11 @@ public class Sequencer {
           ByteString startSegment = startConstructEntryPtr.segment;
 
           /* endConstructEntryPtr is local except for properties startPtr/endPtr/length */
-//	    atomicMethodFive(endInfoEntries, segmentLength, substringLength,
-//				entryIndex, endConstructEntryPtr, endSegment,
-//				startConstructEntryPtr, startSegment);
+	    atomicMethodFive(endInfoEntries, segmentLength, substringLength,
+				entryIndex, endConstructEntryPtr, endSegment,
+				startConstructEntryPtr, startSegment);
 
-	    atomicMethodFive(segmentLength);
+	    // atomicMethodFive(segmentLength);
 
           if (!endInfoEntries[entryIndex].isEnd) { /* if there was a match */
             break;
@@ -350,37 +351,37 @@ public class Sequencer {
   }
 
   @Atomic
-  private static void atomicMethodFive(/*endInfoEntry[] endInfoEntries,*/
+  private static void atomicMethodFive1(/*endInfoEntry[] endInfoEntries,*/
   		int segmentLength) {
   	////trans2(null, null, null, null, segmentLength, 0, null, 0);
   }
  
-  /*
+  
   @Atomic
-private static void atomicMethodFive2(endInfoEntry[] endInfoEntries,
+private static void atomicMethodFive(endInfoEntry[] endInfoEntries,
 		int segmentLength, int substringLength, int entryIndex,
 		constructEntry endConstructEntryPtr, ByteString endSegment,
 		constructEntry startConstructEntryPtr, ByteString startSegment) {
 	trans2(startSegment, endSegment, startConstructEntryPtr, endConstructEntryPtr, segmentLength, substringLength, endInfoEntries, entryIndex);
-	//            if(startConstructEntryPtr.isStart &&
-	//   (endConstructEntryPtr.startPtr != startConstructEntryPtr) &&
-	//   (startSegment.substring(0, (int)substringLength).compareTo(endSegment.substring((int)(segmentLength-substringLength))) == 0))
-	// {
-	// startConstructEntryPtr.isStart = false;
+	            if(startConstructEntryPtr.isStart &&
+	   (endConstructEntryPtr.startPtr != startConstructEntryPtr) &&
+	   (startSegment.substring(0, (int)substringLength).compareTo(endSegment.substring((int)(segmentLength-substringLength))) == 0))
+	 {
+	 startConstructEntryPtr.isStart = false;
 
 	      /* Update endInfo (appended something so no inter end) */
-	      //endInfoEntries[entryIndex].isEnd = false;
+	      endInfoEntries[entryIndex].isEnd = false;
 	      /* Update segment chain construct info */
-	//   constructEntry startConstructEntry_endPtr = startConstructEntryPtr.endPtr;
-	    //  constructEntry endConstructEntry_startPtr = endConstructEntryPtr.startPtr;
-	    //  startConstructEntry_endPtr.startPtr = endConstructEntry_startPtr;
-	    //  endConstructEntryPtr.nextPtr = startConstructEntryPtr;
-	// endConstructEntry_startPtr.endPtr = startConstructEntry_endPtr;
-	// endConstructEntryPtr.overlap = substringLength;
-	// int newLength = endConstructEntry_startPtr.length + startConstructEntryPtr.length - substringLength;
-	// endConstructEntry_startPtr.length = newLength;
-	// }
-/*}*/
+	   constructEntry startConstructEntry_endPtr = startConstructEntryPtr.endPtr;
+	      constructEntry endConstructEntry_startPtr = endConstructEntryPtr.startPtr;
+	      startConstructEntry_endPtr.startPtr = endConstructEntry_startPtr;
+	      endConstructEntryPtr.nextPtr = startConstructEntryPtr;
+	 endConstructEntry_startPtr.endPtr = startConstructEntry_endPtr;
+	 endConstructEntryPtr.overlap = substringLength;
+	 int newLength = endConstructEntry_startPtr.length + startConstructEntryPtr.length - substringLength;
+	 endConstructEntry_startPtr.length = newLength;
+	 }
+}
 
   @Atomic
 private static void atomicMethodFour(Table hashToConstructEntryTable,

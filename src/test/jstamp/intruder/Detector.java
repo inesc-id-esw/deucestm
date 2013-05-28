@@ -1,5 +1,7 @@
 package jstamp.intruder;
 
+import org.deuce.transform.Exclude;
+
 /* =============================================================================
  *
  * detector.java
@@ -70,6 +72,7 @@ package jstamp.intruder;
  * =============================================================================
  */
 
+@Exclude
 public class Detector {
 
 	Dictionary dictionaryPtr;

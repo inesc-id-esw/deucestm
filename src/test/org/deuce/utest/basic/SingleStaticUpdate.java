@@ -20,8 +20,28 @@ public class SingleStaticUpdate  extends TestCase{
 	private static String[] stringArrvar;
 	private static boolean[][] booleanArrArrVar;
 	
+        @Atomic int intVar(){return intVar;}
+        @Atomic long longVar(){return longVar;}
+        @Atomic double doubleVar(){return doubleVar;}
+        @Atomic Object objectVar(){return objectVar;}
+        @Atomic String stringVar(){return stringVar;}
+
+        @Atomic int intArrVar(int idx){return intArrVar[idx];}
+        @Atomic long longArrVar(int idx){return longArrVar[idx];}
+        @Atomic double doubleArrVar(int idx){return doubleArrVar[idx];}
+        @Atomic Object objectArrvar(int idx){return objectArrvar[idx];}
+        @Atomic String stringArrvar(int idx){return stringArrvar[idx];}
+	
     @Override
     public void setUp() { 
+        setUpAtomic();
+    }
+    /**
+     * Multi-dimensional arrays such as booleanArrArrVar should be accessed 
+     * in atomic methods when they are wrapped in CapturedStateArray.
+     */
+    @Atomic
+    public void setUpAtomic() {
     	intVar = 0;
     	longVar = 0;
     	doubleVar = 0;
@@ -41,20 +61,28 @@ public class SingleStaticUpdate  extends TestCase{
 	public void testSimpleAdd() {
 		atomicSingleUpdate();
 		
-		Assert.assertEquals(1, intVar);
-		Assert.assertEquals(1, longVar);
-		Assert.assertEquals(1.0, doubleVar);
-		Assert.assertNotNull(objectVar);
-		Assert.assertEquals("a", stringVar);
+		Assert.assertEquals(1, intVar());
+		Assert.assertEquals(1, longVar());
+		Assert.assertEquals(1.0, doubleVar());
+		Assert.assertNotNull(objectVar());
+		Assert.assertEquals("a", stringVar());
 		
-		Assert.assertEquals(1, intArrVar[0]);
-		Assert.assertEquals(1, longArrVar[0]);
-		Assert.assertEquals(1.0, doubleArrVar[0]);
-		Assert.assertNotNull(objectArrvar[0]);
-		Assert.assertEquals("a", stringArrvar[0]);
+		Assert.assertEquals(1, intArrVar(0));
+		Assert.assertEquals(1, longArrVar(0));
+		Assert.assertEquals(1.0, doubleArrVar(0));
+		Assert.assertNotNull(objectArrvar(0));
+		Assert.assertEquals("a", stringArrvar(0));
 		
-		Assert.assertEquals(booleanArrArrVar[0][0], true);
+		Assert.assertEquals(booleanArrArrVar(0, 0), true);
 		
+	}
+	/**
+	 * According to the CapturedMem solution we cannot access
+	 * multi-dimensional arrays in a non-transactional method. 
+	 */
+	@Atomic
+	public boolean booleanArrArrVar(int x, int y){
+	    return booleanArrArrVar[0][0];
 	}
 	
 	@Atomic
@@ -76,17 +104,17 @@ public class SingleStaticUpdate  extends TestCase{
 	public void testSimpleAddAndDec() {
 		atomicSingleUpdateAndDec();
 		
-		Assert.assertEquals(0,intVar);
-		Assert.assertEquals(0L,longVar);
-		Assert.assertEquals(0.0,doubleVar);
-		Assert.assertNull(objectVar);
-		Assert.assertNull(stringVar);
+		Assert.assertEquals(0,intVar());
+		Assert.assertEquals(0L,longVar());
+		Assert.assertEquals(0.0,doubleVar());
+		Assert.assertNull(objectVar());
+		Assert.assertNull(stringVar());
 		
-		Assert.assertEquals(0,intArrVar[0]);
-		Assert.assertEquals(0,longArrVar[0]);
-		Assert.assertEquals(0.0,doubleArrVar[0]);
-		Assert.assertNull(objectArrvar[0]);
-		Assert.assertNull(stringArrvar[0]);
+		Assert.assertEquals(0,intArrVar(0));
+		Assert.assertEquals(0,longArrVar(0));
+		Assert.assertEquals(0.0,doubleArrVar(0));
+		Assert.assertNull(objectArrvar(0));
+		Assert.assertNull(stringArrvar(0));
 		
 	}
 	

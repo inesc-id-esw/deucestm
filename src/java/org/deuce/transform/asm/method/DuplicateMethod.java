@@ -25,6 +25,7 @@ public class DuplicateMethod extends MethodAdapter{
 	final static public String LOCAL_VARIBALE_NAME = "__transactionContext__";
 
 	private final int argumentsSize;
+	private final String className;
 	private final FieldsHolder fieldsHolder;
 	
 	private Label firstLabel;
@@ -32,8 +33,9 @@ public class DuplicateMethod extends MethodAdapter{
 	private boolean addContextToTable = false;
 	private AnalyzerAdapter analyzerAdapter;
 
-	public DuplicateMethod(MethodVisitor mv, boolean isstatic, Method newMethod, FieldsHolder fieldsHolder) {
+	public DuplicateMethod(String className, MethodVisitor mv, boolean isstatic, Method newMethod, FieldsHolder fieldsHolder) {
 		super(mv);
+		this.className = className;
 		this.fieldsHolder = fieldsHolder;
 		this.argumentsSize = Util.calcArgumentsSize( isstatic, newMethod); 
 	}
@@ -64,7 +66,8 @@ public class DuplicateMethod extends MethodAdapter{
 	 */
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-		if( ExcludeIncludeStore.exclude( owner) || 
+		if( ExcludeIncludeStore.exclude( owner) ||
+				ExcludeIncludeStore.immutable( owner) ||
 				name.contains("$")){ // Syntactic TODO remove this limitation
 			super.visitFieldInsn(opcode, owner, name, desc); // ... = foo( ...
 			return;
@@ -145,6 +148,10 @@ public class DuplicateMethod extends MethodAdapter{
 	 */
 	@Override
 	public void visitInsn(int opcode) {
+		if(ExcludeIncludeStore.immutable(className)){
+			super.visitInsn(opcode);
+			return;
+		}
 		boolean load = false;
 		boolean store = false;
 		String desc = null;

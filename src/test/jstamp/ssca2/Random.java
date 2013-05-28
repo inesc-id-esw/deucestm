@@ -1,5 +1,8 @@
 package jstamp.ssca2;
 
+import org.deuce.transform.Exclude;
+
+@Exclude
 public class Random {
   int[] mt; 
   int mti;

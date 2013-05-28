@@ -47,38 +47,139 @@ import org.deuce.Atomic;
  * =============================================================================
  */
 
+class InternalAtomicData{
+    private int[] global_permV;
+    private int[] global_cliqueSizes;
+    private int global_totCliques;
+    private int[] global_firstVsInCliques;
+    private int[] global_lastVsInCliques;
+    private int[] global_i_edgeStartCounter;
+    private int[] global_i_edgeEndCounter;
+    int global_edgeNum;
+    int global_numStrWtEdges;
+    private int[] global_startVertex;
+    private int[] global_endVertex;
+    private int[] global_tempIndex;
+    
+    @Atomic
+    public void setGlobal_permV(int[] permV) {
+        global_permV = permV;
+    }
+    
+    @Atomic
+    public int[] global_permV() {
+        return global_permV;
+    }
+
+    @Atomic
+    public void set_global_cliqueSizes(int[] cliqueSizes) {
+        global_cliqueSizes = cliqueSizes;
+    }
+
+    @Atomic
+    public int[] global_cliqueSizes() {
+        return global_cliqueSizes;
+    }
+
+    @Atomic
+    public void set_global_lastVsInCliques(int[] lastVsInCliques) {
+        global_lastVsInCliques = lastVsInCliques;
+    }
+
+    @Atomic
+    public void set_global_firstVsInCliques(int[] firstVsInCliques) {
+        global_firstVsInCliques = firstVsInCliques;
+    }
+
+    @Atomic
+    public void set_global_totCliques(int totCliques) {
+        global_totCliques = totCliques;
+    }
+
+    @Atomic
+    public int global_totCliques() {
+        return global_totCliques;
+    }
+
+    @Atomic
+    public int[] global_firstVsInCliques() {
+        return global_firstVsInCliques;
+    }
+
+    @Atomic
+    public int[] global_lastVsInCliques() {
+        return global_lastVsInCliques;
+    }
+
+    @Atomic
+    public void set_global_i_edgeStartCounter(int[] i_edgeStartCounter) {
+        global_i_edgeStartCounter = i_edgeStartCounter;
+    }
+
+    @Atomic
+    public void set_global_i_edgeEndCounter(int[] i_edgeEndCounter) {
+        global_i_edgeEndCounter = i_edgeEndCounter;
+    }
+
+    @Atomic
+    public int[] global_i_edgeEndCounter() {
+        return global_i_edgeEndCounter;
+    }
+
+    @Atomic
+    public int[] global_i_edgeStartCounter() {
+        return global_i_edgeStartCounter;
+    }
+
+    @Atomic
+    public int global_edgeNum() {
+        return global_edgeNum;
+    }
+
+    @Atomic
+    public void set_global_startVertex(int[] startVertex) {
+        global_startVertex = startVertex;
+    }
+
+    @Atomic
+    public void set_global_endVertex(int[] endVertex) {
+        global_endVertex = endVertex;
+    }
+
+    @Atomic
+    public int[] global_startVertex() {
+        return global_startVertex;
+    }
+
+    @Atomic
+    public int[] global_endVertex() {
+        return global_endVertex;
+    }
+
+    @Atomic
+    public void set_global_edgeNum(int i) {
+        global_edgeNum = i;
+    }
+
+    @Atomic
+    public int global_numStrWtEdges() {
+        return global_numStrWtEdges;
+    }
+
+    @Atomic
+    public void set_global_tempIndex(int[] tempIndex) {
+        global_tempIndex = tempIndex;
+    }
+
+    @Atomic
+    public int[] global_tempIndex() {
+        return global_tempIndex;
+    }
+}
+
 public class GenScalData {
 
-  public int[] global_permV;
-  public int[] global_cliqueSizes;
-  public int global_totCliques;
-  public int[] global_firstVsInCliques;
-  public int[] global_lastVsInCliques;
-  public int[] global_i_edgeStartCounter;
-  public int[] global_i_edgeEndCounter;
-  public int global_edgeNum;
-  public int global_numStrWtEdges;
-  public int[] global_startVertex;
-  public int[] global_endVertex;
-  public int[] global_tempIndex;
-
-  /**
-   * Constructor
-   **/
-  public GenScalData() {
-    global_permV              = null;
-    global_cliqueSizes        = null;
-    global_totCliques         = 0;
-    global_firstVsInCliques   = null;
-    global_lastVsInCliques    = null;
-    global_i_edgeStartCounter = null;
-    global_i_edgeEndCounter   = null;
-    global_edgeNum            = 0;
-    global_numStrWtEdges      = 0;
-    global_startVertex        = null;
-    global_endVertex          = null;
-    global_tempIndex          = null;
-  }
+    InternalAtomicData inData = new InternalAtomicData();
 
 
   /**
@@ -495,7 +596,7 @@ public class GenScalData {
 
       int numEdgesPlaced = numEdgesPlacedInCliques + numEdgesPlacedOutside;
 
-      SDGdataPtr.numEdgesPlaced = numEdgesPlaced;
+      SDGdataPtr.set_numEdgesPlaced(numEdgesPlaced);
 
       System.out.println("Finished generating edges");
       System.out.println("No. of intra-clique edges - " + numEdgesPlacedInCliques);
@@ -506,7 +607,7 @@ public class GenScalData {
        * STEP 4: Generate edge weights
        */
 
-      SDGdataPtr.intWeight = new int[numEdgesPlaced];
+      SDGdataPtr.set_intWeight(new int[numEdgesPlaced]);
 
       p = glb.PERC_INT_WEIGHTS;
       int numStrWtEdges  = 0;
@@ -514,10 +615,10 @@ public class GenScalData {
       for (int i = 0; i < numEdgesPlaced; i++) {
         float r = (float)(randomPtr.posrandom_generate() % 1000) / (float)1000;
         if (r <= p) {
-          SDGdataPtr.intWeight[i] =
-            (int) (1 + (randomPtr.posrandom_generate() % (glb.MAX_INT_WEIGHT-1)));
+          SDGdataPtr.set_intWeight( i, 
+            (int) (1 + (randomPtr.posrandom_generate() % (glb.MAX_INT_WEIGHT-1))));
         } else {
-          SDGdataPtr.intWeight[i] = -1;
+          SDGdataPtr.set_intWeight(i, -1);
           numStrWtEdges++;
         }
       }
@@ -525,20 +626,20 @@ public class GenScalData {
       {
         int t = 0;
         for (int i = 0; i < numEdgesPlaced; i++) {
-          if (SDGdataPtr.intWeight[i] < 0) {
-            SDGdataPtr.intWeight[i] = -t;
+          if (SDGdataPtr.intWeight(i) < 0) {
+            SDGdataPtr.set_intWeight(i, -t);
             t++;
           }
         }
       }
 
-      SDGdataPtr.strWeight = new byte[numStrWtEdges * glb.MAX_STRLEN];
+      SDGdataPtr.set_strWeight(new byte[numStrWtEdges * glb.MAX_STRLEN]);
 
       for (int i = 0; i < numEdgesPlaced; i++) {
-        if (SDGdataPtr.intWeight[i] <= 0) {
+        if (SDGdataPtr.intWeight(i) <= 0) {
           for (int j = 0; j < glb.MAX_STRLEN; j++) {
-            SDGdataPtr.strWeight[(-SDGdataPtr.intWeight[i])*glb.MAX_STRLEN+j] =
-              (byte) (1 + randomPtr.posrandom_generate() % 127);
+            SDGdataPtr.set_strWeight((-SDGdataPtr.intWeight(i))*glb.MAX_STRLEN+j,
+              (byte) (1 + randomPtr.posrandom_generate() % 127));
           }
         }
       }
@@ -555,7 +656,7 @@ public class GenScalData {
         int t = (int) (randomPtr.posrandom_generate() % numStrWtEdges);
         for (int j = 0; j < glb.MAX_STRLEN; j++) {
           glb.SOUGHT_STRING[j] =
-            SDGdataPtr.strWeight[(t*glb.MAX_STRLEN+j)];
+            SDGdataPtr.strWeight((t*glb.MAX_STRLEN+j));
         }
       }
 
@@ -577,14 +678,14 @@ public class GenScalData {
        */
 
       numByte = numEdgesPlaced;
-      SDGdataPtr.startVertex = new int[numByte];
-      SDGdataPtr.endVertex = new int[numByte];
+      SDGdataPtr.set_startVertex(new int[numByte]);
+      SDGdataPtr.set_endVertex(new int[numByte]);
 
       radixsort.all_radixsort_node_aux_s3_seq(numEdgesPlaced,
           startVertex,
-          SDGdataPtr.startVertex,
+          SDGdataPtr.startVertex(),
           endVertex,
-          SDGdataPtr.endVertex);
+          SDGdataPtr.endVertex());
 
       if (glb.SCALE < 12) {
 
@@ -599,8 +700,8 @@ public class GenScalData {
         while (i < numEdgesPlaced) {
 
           for (i = i0; i < numEdgesPlaced; i++) {
-            if (SDGdataPtr.startVertex[i] !=
-                SDGdataPtr.startVertex[i1])
+            if (SDGdataPtr.startVertex(i) !=
+                SDGdataPtr.startVertex(i1))
             {
               i1 = i;
               break;
@@ -609,27 +710,27 @@ public class GenScalData {
 
           for (int j = i0; j < i1; j++) {
             for (int k = j+1; k < i1; k++) {
-              if (SDGdataPtr.endVertex[k] <
-                  SDGdataPtr.endVertex[j])
+              if (SDGdataPtr.endVertex(k) <
+                  SDGdataPtr.endVertex(j))
               {
-                int t = SDGdataPtr.endVertex[j];
-                SDGdataPtr.endVertex[j] = SDGdataPtr.endVertex[k];
-                SDGdataPtr.endVertex[k] = t;
+                int t = SDGdataPtr.endVertex(j);
+                SDGdataPtr.set_endVertex(j, SDGdataPtr.endVertex(k));
+                SDGdataPtr.set_endVertex(k, t);
               }
             }
           }
 
-          if (SDGdataPtr.startVertex[i0] != glb.TOT_VERTICES-1) {
+          if (SDGdataPtr.startVertex(i0) != glb.TOT_VERTICES-1) {
             i0 = i1;
           } else {
             for (int j=i0; j<numEdgesPlaced; j++) {
               for (int k=j+1; k<numEdgesPlaced; k++) {
-                if (SDGdataPtr.endVertex[k] <
-                    SDGdataPtr.endVertex[j])
+                if (SDGdataPtr.endVertex(k) <
+                    SDGdataPtr.endVertex(j))
                 {
-                  int t = SDGdataPtr.endVertex[j];
-                  SDGdataPtr.endVertex[j] = SDGdataPtr.endVertex[k];
-                  SDGdataPtr.endVertex[k] = t;
+                  int t = SDGdataPtr.endVertex(j);
+                  SDGdataPtr.set_endVertex(j, SDGdataPtr.endVertex(k));
+                  SDGdataPtr.set_endVertex(k, t);
                 }
               }
             }
@@ -652,10 +753,10 @@ public class GenScalData {
         for (int i=0; i < glb.TOT_VERTICES; i++) {
           tempIndex[i+1] = tempIndex[i];
           for (int j = i0; j < numEdgesPlaced; j++) {
-            if (SDGdataPtr.startVertex[j] !=
-                SDGdataPtr.startVertex[i0])
+            if (SDGdataPtr.startVertex(j) !=
+                SDGdataPtr.startVertex(i0))
             {
-              if (SDGdataPtr.startVertex[i0] == i) {
+              if (SDGdataPtr.startVertex(i0) == i) {
                 tempIndex[i+1] = j;
                 i0 = j;
                 break;
@@ -670,12 +771,12 @@ public class GenScalData {
         for (int i = 0; i < glb.TOT_VERTICES; i++) {
           for (int j = tempIndex[i]; j < tempIndex[i+1]; j++) {
             for (int k = (j + 1); k < tempIndex[i+1]; k++) {
-              if (SDGdataPtr.endVertex[k] <
-                  SDGdataPtr.endVertex[j])
+              if (SDGdataPtr.endVertex(k) <
+                  SDGdataPtr.endVertex(j))
               {
-                int t = SDGdataPtr.endVertex[j];
-                SDGdataPtr.endVertex[j] = SDGdataPtr.endVertex[k];
-                SDGdataPtr.endVertex[k] = t;
+                int t = SDGdataPtr.endVertex(j);
+                SDGdataPtr.set_endVertex(j, SDGdataPtr.endVertex(k));
+                SDGdataPtr.set_endVertex(k, t);
               }
             }
           }
@@ -705,12 +806,12 @@ public class GenScalData {
 
       if (myId == 0) {
         permV = new int[glb.TOT_VERTICES];
-        gsd.global_permV = permV;
+        gsd.inData.setGlobal_permV(permV);
       }
 
       Barrier.enterBarrier();
 
-      permV = gsd.global_permV;
+      permV = gsd.inData.global_permV();
 
       LocalStartStop lss = new LocalStartStop();
       CreatePartition.createPartition(0, glb.TOT_VERTICES, myId, numThread, lss);
@@ -723,6 +824,7 @@ public class GenScalData {
       Barrier.enterBarrier();
 
       for (int i = lss.i_start; i < lss.i_stop; i++) {
+          // System.out.println(i + "/" + lss.i_stop); // fmc
         int t1 = (int) (randomPtr.posrandom_generate());
         int t = i + t1 % (glb.TOT_VERTICES - i);
         if (t != i) {
@@ -746,12 +848,12 @@ public class GenScalData {
        */
       if (myId == 0) {
         cliqueSizes = new int[estTotCliques];
-        gsd.global_cliqueSizes = cliqueSizes;
+        gsd.inData.set_global_cliqueSizes(cliqueSizes);
       }
 
       Barrier.enterBarrier();
 
-      cliqueSizes = gsd.global_cliqueSizes;
+      cliqueSizes = gsd.inData.global_cliqueSizes();
 
       CreatePartition.createPartition(0, estTotCliques, myId, numThread, lss);
 
@@ -773,9 +875,9 @@ public class GenScalData {
 
       if (myId == 0) {
         lastVsInCliques = new int[estTotCliques];
-        gsd.global_lastVsInCliques = lastVsInCliques;
+        gsd.inData.set_global_lastVsInCliques(lastVsInCliques);
         firstVsInCliques = new int[estTotCliques];
-        gsd.global_firstVsInCliques = firstVsInCliques;
+        gsd.inData.set_global_firstVsInCliques(firstVsInCliques);
 
         /*
          * Sum up vertices in each clique to determine the lastVsInCliques array
@@ -791,7 +893,7 @@ public class GenScalData {
         }
         totCliques = i + 1;
 
-        gsd.global_totCliques = totCliques;
+        gsd.inData.set_global_totCliques(totCliques);
 
         /*
          * Fix the size of the last clique
@@ -806,9 +908,9 @@ public class GenScalData {
 
       Barrier.enterBarrier();
 
-      lastVsInCliques  = gsd.global_lastVsInCliques;
-      firstVsInCliques = gsd.global_firstVsInCliques;
-      totCliques = gsd.global_totCliques;
+      lastVsInCliques  = gsd.inData.global_lastVsInCliques();
+      firstVsInCliques = gsd.inData.global_firstVsInCliques();
+      totCliques = gsd.inData.global_totCliques();
 
       /* Compute start Vertices in cliques. */
       CreatePartition.createPartition(1, totCliques, myId, numThread, lss);
@@ -970,15 +1072,15 @@ Barrier.enterBarrier();
 
       if (myId == 0) {
         i_edgeStartCounter = new int[numThread];
-        gsd.global_i_edgeStartCounter = i_edgeStartCounter;
+        gsd.inData.set_global_i_edgeStartCounter(i_edgeStartCounter);
         i_edgeEndCounter = new int[numThread];
-        gsd.global_i_edgeEndCounter = i_edgeEndCounter;
+        gsd.inData.set_global_i_edgeEndCounter(i_edgeEndCounter);
       }
 
       Barrier.enterBarrier();
 
-      i_edgeStartCounter = gsd.global_i_edgeStartCounter;
-      i_edgeEndCounter   = gsd.global_i_edgeEndCounter;
+      i_edgeStartCounter = gsd.inData.global_i_edgeStartCounter();
+      i_edgeEndCounter   = gsd.inData.global_i_edgeEndCounter();
 
       i_edgeEndCounter[myId] = i_edgePtr;
       i_edgeStartCounter[myId] = 0;
@@ -998,7 +1100,7 @@ Barrier.enterBarrier();
 
       Barrier.enterBarrier();
 
-      int edgeNum = gsd.global_edgeNum;
+      int edgeNum = gsd.inData.global_edgeNum();
 
       /*
        * Initialize edge list arrays
@@ -1017,14 +1119,14 @@ Barrier.enterBarrier();
           startVertex = new int[numByte];
           endVertex = new int[numByte];
         }
-        gsd.global_startVertex = startVertex;
-        gsd.global_endVertex = endVertex;
+        gsd.inData.set_global_startVertex(startVertex);
+        gsd.inData.set_global_endVertex(endVertex);
       }
 
       Barrier.enterBarrier();
 
-      startVertex = gsd.global_startVertex;
-      endVertex = gsd.global_endVertex;
+      startVertex = gsd.inData.global_startVertex();
+      endVertex = gsd.inData.global_endVertex();
 
       for (int i =  i_edgeStartCounter[myId]; i <  i_edgeEndCounter[myId]; i++) {
         startVertex[i] = startV[i-i_edgeStartCounter[myId]];
@@ -1191,7 +1293,7 @@ Barrier.enterBarrier();
       i_edgeStartCounter[myId] = 0;
 
       if (myId == 0) {
-        gsd.global_edgeNum = 0;
+        gsd.inData.set_global_edgeNum(0);
       }
 
       Barrier.enterBarrier();
@@ -1209,8 +1311,8 @@ Barrier.enterBarrier();
 
       Barrier.enterBarrier();
 
-      edgeNum = gsd.global_edgeNum;
-      int numEdgesPlacedOutside = gsd.global_edgeNum;
+      edgeNum = gsd.inData.global_edgeNum();
+      int numEdgesPlacedOutside = gsd.inData.global_edgeNum();
 
       for (int i = i_edgeStartCounter[myId]; i <  i_edgeEndCounter[myId]; i++) {
         startVertex[i+numEdgesPlacedInCliques] = startV[i-i_edgeStartCounter[myId]];
@@ -1222,7 +1324,7 @@ Barrier.enterBarrier();
       int numEdgesPlaced = numEdgesPlacedInCliques + numEdgesPlacedOutside;
 
       if (myId == 0) {
-        SDGdataPtr.numEdgesPlaced =  numEdgesPlaced;
+        SDGdataPtr.set_numEdgesPlaced(numEdgesPlaced);
 
         System.out.println("Finished generating edges");
         System.out.println("No. of intra-clique edges - " + numEdgesPlacedInCliques);
@@ -1237,65 +1339,39 @@ Barrier.enterBarrier();
        */
 
       if (myId == 0) {
-        SDGdataPtr.intWeight = new int[numEdgesPlaced];
+        SDGdataPtr.set_intWeight(new int[numEdgesPlaced]);
       }
 
       Barrier.enterBarrier();
 
       p = glb.PERC_INT_WEIGHTS;
-      int numStrWtEdges  = 0;
 
+      
       CreatePartition.createPartition(0, numEdgesPlaced, myId, numThread, lss);
 
-      for (int i = lss.i_start; i < lss.i_stop; i++) {
-        float r = (float)(randomPtr.posrandom_generate() % 1000) / (float)1000;
-        if (r <= p) {
-          SDGdataPtr.intWeight[i] =
-            (int) (1 + (randomPtr.posrandom_generate() % (glb.MAX_INT_WEIGHT-1)));
-        } else {
-          SDGdataPtr.intWeight[i] = -1;
-          numStrWtEdges++;
-        }
-      }
-
+      int numStrWtEdges  = atomicAuxOne(SDGdataPtr, randomPtr, lss, p, glb);
+      
       Barrier.enterBarrier();
 
-      if (myId == 0) {
-        int t = 0;
-        for (int i = 0; i < numEdgesPlaced; i++) {
-          if (SDGdataPtr.intWeight[i] < 0) {
-            SDGdataPtr.intWeight[i] = -t;
-            t++;
-          }
-        }
-      }
-
+      atomicAuxTwo(SDGdataPtr, myId, numEdgesPlaced);
       
         atomicMethodSix(gsd, numStrWtEdges);
       
 
       Barrier.enterBarrier();
 
-      numStrWtEdges = gsd.global_numStrWtEdges;
+      numStrWtEdges = gsd.inData.global_numStrWtEdges();
 
       if (myId == 0) {
-        SDGdataPtr.strWeight = new byte[numStrWtEdges * glb.MAX_STRLEN];
+        SDGdataPtr.set_strWeight(new byte[numStrWtEdges * glb.MAX_STRLEN]);
       }
 
       Barrier.enterBarrier();
 
       CreatePartition.createPartition(0, numEdgesPlaced, myId, numThread, lss);
 
-      for (int i = lss.i_start; i < lss.i_stop; i++) {
-        if (SDGdataPtr.intWeight[i] <= 0) {
-          for (int j = 0; j < glb.MAX_STRLEN; j++) {
-            SDGdataPtr.strWeight[(-SDGdataPtr.intWeight[i])*glb.MAX_STRLEN+j] =
-              //FIXME if needed
-              (byte) (1 + (randomPtr.posrandom_generate() % 127));
-          }
-        }
-      }
-
+      atomicAuxThree(SDGdataPtr, randomPtr, lss, glb);
+      
       /*
        * Choose SOUGHT STRING randomly if not assigned
        */
@@ -1309,7 +1385,7 @@ Barrier.enterBarrier();
         int t = (int) (randomPtr.posrandom_generate() % numStrWtEdges);
         for (int j = 0; j < glb.MAX_STRLEN; j++) {
           glb.SOUGHT_STRING[j] =
-            SDGdataPtr.strWeight[(t*glb.MAX_STRLEN+j)];
+            SDGdataPtr.strWeight((t*glb.MAX_STRLEN+j));
         }
 
       }
@@ -1337,8 +1413,8 @@ Barrier.enterBarrier();
 
       if (myId == 0) {
         int numByte = numEdgesPlaced;
-        SDGdataPtr.startVertex = new int[numByte];
-        SDGdataPtr.endVertex = new int[numByte];
+        SDGdataPtr.set_startVertex(new int[numByte]);
+        SDGdataPtr.set_endVertex(new int[numByte]);
       }
 
       Barrier.enterBarrier();
@@ -1347,9 +1423,9 @@ Barrier.enterBarrier();
           numThread,
           numEdgesPlaced,
           startVertex,
-          SDGdataPtr.startVertex,
+          SDGdataPtr.startVertex(),
           endVertex,
-          SDGdataPtr.endVertex,
+          SDGdataPtr.endVertex(),
           radixsort);
 
       Barrier.enterBarrier();
@@ -1369,8 +1445,8 @@ Barrier.enterBarrier();
           while (i < numEdgesPlaced) {
 
             for (i = i0; i < numEdgesPlaced; i++) {
-              if (SDGdataPtr.startVertex[i] !=
-                  SDGdataPtr.startVertex[i1])
+              if (SDGdataPtr.startVertex(i) !=
+                  SDGdataPtr.startVertex(i1))
               {
                 i1 = i;
                 break;
@@ -1379,27 +1455,27 @@ Barrier.enterBarrier();
 
             for (int j = i0; j < i1; j++) {
               for (int k = j+1; k < i1; k++) {
-                if (SDGdataPtr.endVertex[k] <
-                    SDGdataPtr.endVertex[j])
+                if (SDGdataPtr.endVertex(k) <
+                    SDGdataPtr.endVertex(j))
                 {
-                  int t = SDGdataPtr.endVertex[j];
-                  SDGdataPtr.endVertex[j] = SDGdataPtr.endVertex[k];
-                  SDGdataPtr.endVertex[k] = t;
+                  int t = SDGdataPtr.endVertex(j);
+                  SDGdataPtr.set_endVertex(j, SDGdataPtr.endVertex(k));
+                  SDGdataPtr.set_endVertex(k, t);
                 }
               }
             }
 
-            if (SDGdataPtr.startVertex[i0] != glb.TOT_VERTICES-1) {
+            if (SDGdataPtr.startVertex(i0) != glb.TOT_VERTICES-1) {
               i0 = i1;
             } else {
               for (int j=i0; j<numEdgesPlaced; j++) {
                 for (int k=j+1; k<numEdgesPlaced; k++) {
-                  if (SDGdataPtr.endVertex[k] <
-                      SDGdataPtr.endVertex[j])
+                  if (SDGdataPtr.endVertex(k) <
+                      SDGdataPtr.endVertex(j))
                   {
-                    int t = SDGdataPtr.endVertex[j];
-                    SDGdataPtr.endVertex[j] = SDGdataPtr.endVertex[k];
-                    SDGdataPtr.endVertex[k] = t;
+                    int t = SDGdataPtr.endVertex(j);
+                    SDGdataPtr.set_endVertex(j, SDGdataPtr.endVertex(k));
+                    SDGdataPtr.set_endVertex(k, t);
                   }
                 }
               }
@@ -1416,7 +1492,7 @@ Barrier.enterBarrier();
         if (myId == 0) {
 
           tempIndex = new int[glb.TOT_VERTICES + 1];
-          gsd.global_tempIndex = tempIndex;
+          gsd.inData.set_global_tempIndex(tempIndex);
 
           /*
            * Update degree of each vertex
@@ -1429,10 +1505,10 @@ Barrier.enterBarrier();
           for (int i=0; i < glb.TOT_VERTICES; i++) {
             tempIndex[i+1] = tempIndex[i];
             for (int j = i0; j <  numEdgesPlaced; j++) {
-              if (SDGdataPtr.startVertex[j] !=
-                  SDGdataPtr.startVertex[i0])
+              if (SDGdataPtr.startVertex(j) !=
+                  SDGdataPtr.startVertex(i0))
               {
-                if (SDGdataPtr.startVertex[i0] == i) {
+                if (SDGdataPtr.startVertex(i0) == i) {
                   tempIndex[i+1] = j;
                   i0 = j;
                   break;
@@ -1444,7 +1520,7 @@ Barrier.enterBarrier();
 
         Barrier.enterBarrier();
 
-        tempIndex = gsd.global_tempIndex;
+        tempIndex = gsd.inData.global_tempIndex();
 
         /*
          * Insertion sort for now, replace with something better later on
@@ -1455,12 +1531,12 @@ Barrier.enterBarrier();
           for (int i = 0; i < glb.TOT_VERTICES; i++) {
             for (int j =  tempIndex[i]; j <  tempIndex[i+1]; j++) {
               for (int k = (j + 1); k < tempIndex[i+1]; k++) {
-                if (SDGdataPtr.endVertex[k] <
-                    SDGdataPtr.endVertex[j])
+                if (SDGdataPtr.endVertex(k) <
+                    SDGdataPtr.endVertex(j))
                 {
-                  int t = SDGdataPtr.endVertex[j];
-                  SDGdataPtr.endVertex[j] = SDGdataPtr.endVertex[k];
-                  SDGdataPtr.endVertex[k] = t;
+                  int t = SDGdataPtr.endVertex(j);
+                  SDGdataPtr.set_endVertex(j, SDGdataPtr.endVertex(k));
+                  SDGdataPtr.set_endVertex(k, t);
                 }
               }
             }
@@ -1471,15 +1547,54 @@ Barrier.enterBarrier();
 
     }
 
-
+  @Atomic
+  private static int  atomicAuxOne(GraphSDG SDGdataPtr, Random randomPtr, LocalStartStop lss, float p, Globals glb) {
+      int numStrWtEdges  = 0;
+      for (int i = lss.i_start; i < lss.i_stop; i++) {
+          float r = (float)(randomPtr.posrandom_generate() % 1000) / (float)1000;
+          if (r <= p) {
+              SDGdataPtr.intWeight[i] = (int) (1 + (randomPtr.posrandom_generate() % (glb.MAX_INT_WEIGHT-1)));
+          } else {
+              SDGdataPtr.intWeight[i] =-1;
+              numStrWtEdges++;
+          }
+      }
+      return numStrWtEdges;
+  }
+  
+  @Atomic
+  private static void atomicAuxTwo(GraphSDG SDGdataPtr, int myId, int numEdgesPlaced) {
+        if (myId == 0) {
+        int t = 0;
+        for (int i = 0; i < numEdgesPlaced; i++) {
+          if (SDGdataPtr.intWeight[i] < 0) {
+            SDGdataPtr.intWeight[i] = -t;
+            t++;
+          }
+        }
+      }
+  }
+  @Atomic
+  private static void  atomicAuxThree(GraphSDG SDGdataPtr, Random randomPtr, LocalStartStop lss, Globals glb) {
+        for (int i = lss.i_start; i < lss.i_stop; i++) {
+        if (SDGdataPtr.intWeight[i] <= 0) {
+          for (int j = 0; j < glb.MAX_STRLEN; j++) {
+            SDGdataPtr.strWeight[(-SDGdataPtr.intWeight[i])*glb.MAX_STRLEN+j] = 
+              //FIXME if needed
+              (byte) (1 + (randomPtr.posrandom_generate() % 127));
+          }
+        }
+      }
+  }
+  
   @Atomic
 private static void atomicMethodSix(GenScalData gsd, int numStrWtEdges) {
-	gsd.global_numStrWtEdges = gsd.global_numStrWtEdges + numStrWtEdges;
+	gsd.inData.global_numStrWtEdges = gsd.inData.global_numStrWtEdges + numStrWtEdges;
 }
 
   @Atomic
 private static void atomicMethodFive(GenScalData gsd, int i_edgePtr) {
-	gsd.global_edgeNum = gsd.global_edgeNum + i_edgePtr;
+	gsd.inData.global_edgeNum = gsd.inData.global_edgeNum + i_edgePtr;
 }
 
   @Atomic

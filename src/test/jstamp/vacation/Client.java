@@ -1,6 +1,7 @@
 package jstamp.vacation;
 
 import org.deuce.Atomic;
+import org.deuce.transform.Exclude;
 
 /* =============================================================================
  *
@@ -72,8 +73,35 @@ import org.deuce.Atomic;
  * =============================================================================
  */
 
-
+@Exclude
 public class Client extends Thread {
+    
+    ClientTarget target;
+
+    public Client() {}
+    /* =============================================================================
+     * client_alloc
+     * -- Returns NULL on failure
+     * =============================================================================
+     */
+    public Client(int id,
+            Manager managerPtr,
+            int numOperation,
+            int numQueryPerTransaction,
+            int queryRange,
+            int percentUser) {
+        target = new ClientTarget(id, managerPtr, numOperation, numQueryPerTransaction, queryRange, percentUser);
+
+    }
+    
+    @Override
+    public void run() {
+        target.run();
+    }
+}
+
+class ClientTarget{
+    
   int id;
   Manager managerPtr;
   Random randomPtr;
@@ -82,14 +110,13 @@ public class Client extends Thread {
   int queryRange;
   int percentUser;
 
-  public Client() {}
 
 /* =============================================================================
  * client_alloc
  * -- Returns NULL on failure
  * =============================================================================
  */
-  public Client(int id,
+  public ClientTarget(int id,
 		Manager managerPtr,
 		int numOperation,
 		int numQueryPerTransaction,
@@ -128,21 +155,12 @@ public class Client extends Thread {
  * =============================================================================
  */
   public void run() {
-	  int myId = id;
-
 	  Manager managerPtr = this.managerPtr;
 	  Random randomPtr  = this.randomPtr;
 
 	  int numOperation           = this.numOperation;
-	  int numQueryPerTransaction = this.numQueryPerTransaction;
 	  int queryRange             = this.queryRange;
 	  int percentUser            = this.percentUser;
-
-	  int types[]  = new int[numQueryPerTransaction];
-	  int ids[]    = new int[numQueryPerTransaction];
-	  int ops[]    = new int[numQueryPerTransaction];
-	  int prices[] = new int[numQueryPerTransaction];
-
 	  
 	  Barrier.enterBarrier();  
 	  for (int i = 0; i < numOperation; i++) {
@@ -150,50 +168,52 @@ public class Client extends Thread {
 		  int action = selectAction(r, percentUser);
 
 		  if(action==Defines.ACTION_MAKE_RESERVATION) {
-			  int maxPrices[]=new int[Defines.NUM_RESERVATION_TYPE];
-			  int maxIds[]=new int[Defines.NUM_RESERVATION_TYPE];
-			  maxPrices[0]=-1;
-			  maxPrices[1]=-1;
-			  maxPrices[2]=-1;
-			  maxIds[0]=-1;
-			  maxIds[1]=-1;
-			  maxIds[2]=-1;
-			  int n;
-			  int numQuery = randomPtr.posrandom_generate() % numQueryPerTransaction + 1;
-			  int customerId = randomPtr.posrandom_generate() % queryRange + 1;
-			  for (n = 0; n < numQuery; n++) {
-				  types[n] = randomPtr.random_generate() % Defines.NUM_RESERVATION_TYPE;
-				  ids[n] = (randomPtr.random_generate() % queryRange) + 1;
-			  }
+		          int n;
 			  boolean isFound = false;
 
-			  n = atomicMethodOne(managerPtr, types, ids, maxPrices, maxIds, numQuery,
-					  customerId, isFound);
+			  n = atomicMethodOne(managerPtr, isFound);
 
 		  } else if (action==Defines.ACTION_DELETE_CUSTOMER) {
 			  int customerId = randomPtr.posrandom_generate() % queryRange + 1;
 			  atomicMethodTwo(managerPtr, customerId);
 		  } else if (action==Defines.ACTION_UPDATE_TABLES) {
-			  int numUpdate = randomPtr.posrandom_generate() % numQueryPerTransaction + 1;
-			  int n;
-			  for (n = 0; n < numUpdate; n++) {
-				  types[n] = randomPtr.posrandom_generate() % Defines.NUM_RESERVATION_TYPE;
-				  ids[n] = (randomPtr.posrandom_generate() % queryRange) + 1;
-				  ops[n] = randomPtr.posrandom_generate() % 2;
-				  if (ops[n]==1) {
-					  prices[n] = ((randomPtr.posrandom_generate() % 5) * 10) + 50;
-				  }
-			  }
-			  n = atomicMethodThree(managerPtr, types, ids, ops, prices, numUpdate);
+		          int n;
+			  n = atomicMethodThree(managerPtr);
 		  }
 	  } /* for i */
 	  Barrier.enterBarrier();
   }
 
-  @Atomic
-private int atomicMethodThree(Manager managerPtr, int[] types, int[] ids,
-		int[] ops, int[] prices, int numUpdate) {
-	int n;
+  @Atomic  
+  private int atomicMethodThree(Manager managerPtr) {
+      int numQueryPerTransaction = this.numQueryPerTransaction;
+      int queryRange             = this.queryRange;
+          /*
+           * Setup
+           */
+          int types[]  = new int[numQueryPerTransaction];
+          int ids[]    = new int[numQueryPerTransaction];
+          int ops[]    = new int[numQueryPerTransaction];
+          int prices[] = new int[numQueryPerTransaction];
+          int numUpdate = randomPtr.posrandom_generate() % numQueryPerTransaction + 1;
+          int n;
+          for (n = 0; n < numUpdate; n++) {
+              types[n] = randomPtr.posrandom_generate() % Defines.NUM_RESERVATION_TYPE;
+              ids[n] = (randomPtr.posrandom_generate() % queryRange) + 1;
+              ops[n] = randomPtr.posrandom_generate() % 2;
+              if (ops[n]==1) {
+                  prices[n] = ((randomPtr.posrandom_generate() % 5) * 10) + 50;
+              }
+          }
+          /*
+           * Perform Operation
+           */
+          return performMethodThree(managerPtr, types, ids, ops, prices, numUpdate);
+  }
+  
+  private int performMethodThree(Manager managerPtr, int[] types, int[] ids,
+          int[] ops, int[] prices, int numUpdate) {
+        int n; 
 	for (n = 0; n < numUpdate; n++) {
 	    int t = types[n];
 	    int id = ids[n];
@@ -217,22 +237,52 @@ private int atomicMethodThree(Manager managerPtr, int[] types, int[] ids,
 	      }
 	    }
 	  }
-	return n;
-}
+	  return n;
+      }
 
-  @Atomic
-private void atomicMethodTwo(Manager managerPtr, int customerId) {
-	int bill = managerPtr.manager_queryCustomerBill(customerId);
-	  if (bill >= 0) {
-	    managerPtr.manager_deleteCustomer(customerId);
-	  }
-}
+      @Atomic
+      private void atomicMethodTwo(Manager managerPtr, int customerId) {
+        	int bill = managerPtr.manager_queryCustomerBill(customerId);
+        	  if (bill >= 0) {
+        	    managerPtr.manager_deleteCustomer(customerId);
+        	  }
+      }
 
-  @Atomic
-private int atomicMethodOne(Manager managerPtr, int[] types, int[] ids,
-		int[] maxPrices, int[] maxIds, int numQuery, int customerId,
-		boolean isFound) {
-	int n;
+
+      @Atomic
+      private int atomicMethodOne(Manager managerPtr, boolean isFound) {
+          int numQueryPerTransaction = this.numQueryPerTransaction;
+          int queryRange             = this.queryRange;
+          /*
+           * Setup
+           */
+          int types[]  = new int[numQueryPerTransaction];
+          int ids[]    = new int[numQueryPerTransaction];
+          int maxPrices[]=new int[Defines.NUM_RESERVATION_TYPE];
+          int maxIds[]=new int[Defines.NUM_RESERVATION_TYPE];
+          maxPrices[0]=-1;
+          maxPrices[1]=-1;
+          maxPrices[2]=-1;
+          maxIds[0]=-1;
+          maxIds[1]=-1;
+          maxIds[2]=-1;
+          int n;
+          int numQuery = randomPtr.posrandom_generate() % numQueryPerTransaction + 1;
+          int customerId = randomPtr.posrandom_generate() % queryRange + 1;
+          for (n = 0; n < numQuery; n++) {
+              types[n] = randomPtr.random_generate() % Defines.NUM_RESERVATION_TYPE;
+              ids[n] = (randomPtr.random_generate() % queryRange) + 1;
+          }          
+        /*
+         * Perform operation
+         */
+          return performMethodOne(managerPtr, types, ids, maxPrices, maxIds, numQuery, customerId, isFound);
+      }
+      
+      private int performMethodOne(Manager managerPtr, int[] types, int[] ids,
+                      int[] maxPrices, int[] maxIds, int numQuery, int customerId,
+                      boolean isFound) {
+        int n;
 	for (n = 0; n < numQuery; n++) {
 	    int t = types[n];
 	    int id = ids[n];

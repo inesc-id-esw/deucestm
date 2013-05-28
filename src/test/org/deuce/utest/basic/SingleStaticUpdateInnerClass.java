@@ -19,6 +19,18 @@ public class SingleStaticUpdateInnerClass extends TestCase{
 		private static double[] doubleArrVar;
 		private static Object[] objectArrvar;
 		private static String[] stringArrvar;
+		
+		@Atomic int intVar(){return intVar;}
+		@Atomic long longVar(){return longVar;}
+		@Atomic double doubleVar(){return doubleVar;}
+		@Atomic Object objectVar(){return objectVar;}
+		@Atomic String stringVar(){return stringVar;}
+
+		@Atomic int intArrVar(int idx){return intArrVar[idx];}
+		@Atomic long longArrVar(int idx){return longArrVar[idx];}
+		@Atomic double doubleArrVar(int idx){return doubleArrVar[idx];}
+		@Atomic Object objectArrvar(int idx){return objectArrvar[idx];}
+		@Atomic String stringArrvar(int idx){return stringArrvar[idx];}
 	}
 	
 	private Inner inner;
@@ -44,17 +56,17 @@ public class SingleStaticUpdateInnerClass extends TestCase{
 	public void testSimpleAdd() {
 		atomicSingleUpdate();
 		
-		Assert.assertEquals(inner.intVar, 1);
-		Assert.assertEquals(inner.longVar, 1);
-		Assert.assertEquals(inner.doubleVar, 1.0);
-		Assert.assertNotNull(inner.objectVar);
-		Assert.assertEquals(inner.stringVar, "a");
+		Assert.assertEquals(inner.intVar(), 1);
+		Assert.assertEquals(inner.longVar(), 1);
+		Assert.assertEquals(inner.doubleVar(), 1.0);
+		Assert.assertNotNull(inner.objectVar());
+		Assert.assertEquals(inner.stringVar(), "a");
 		
-		Assert.assertEquals(inner.intArrVar[0], 1);
-		Assert.assertEquals(inner.longArrVar[0], 1);
-		Assert.assertEquals(inner.doubleArrVar[0], 1.0);
-		Assert.assertNotNull(inner.objectArrvar[0]);
-		Assert.assertEquals(inner.stringArrvar[0], "a");
+		Assert.assertEquals(inner.intArrVar(0), 1);
+		Assert.assertEquals(inner.longArrVar(0), 1);
+		Assert.assertEquals(inner.doubleArrVar(0), 1.0);
+		Assert.assertNotNull(inner.objectArrvar(0));
+		Assert.assertEquals(inner.stringArrvar(0), "a");
 		
 	}
 	

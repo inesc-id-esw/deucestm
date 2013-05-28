@@ -23,7 +23,7 @@ public class CompositePartTest extends InvariantTest {
 
 		traversedObjects.components.add(component);
 
-		System.err.print("Component " + traversedObjects.components.size() + "\r");
+		// System.err.print("Component " + traversedObjects.components.size() + "\r");
 			
 		DesignObjTest.checkInvariants(component, initial, Parameters.MaxCompParts, 0, Integer.MAX_VALUE - 1);
 		

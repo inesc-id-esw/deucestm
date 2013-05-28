@@ -28,27 +28,40 @@
 		</jar>
 	</target>
 
-	<target name="Tests" depends="agent-jar,tests-jar">
+	<target name="Tests" depends="instrument-rt,instrument-rt-jvstm,agent-jar,compile-tests">
 		<antcall target="junits">
 			<param name="sysprop" value="org.deuce.transaction.contextClass"/>
-			<param name="value" value="org.deuce.transaction.norec.Context"/>
-			<param name="exclude" value="org/deuce/utest/basic/IrrevocableContextTest.class"/>
+			<param name="value" value="org.deuce.transaction.jvstm.Context"/>
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-jvstm.jar${path.separator}${basedir}/bin/deuceAgent.jar${path.separator}${basedir}/lib/jvstm-2.0.jar"/>
+			<param name="exclude" value="org/deuce/utest/basic/IrrevocableContextTest.class, org/deuce/utest/capmem/**/*.class"/>
+			<param name="delegator" value="org.deuce.transaction.jvstm.ContextDelegator"/> <!-- This is the delegator required by the JVSTM -->
+			<param name="capmem" value="-Djvstm.capmem=true"/> <!-- activate the captured memory analysis in the JVSTM -->
 		</antcall>
 		<antcall target="junits">
 			<param name="sysprop" value="org.deuce.transaction.contextClass"/>
 			<param name="value" value="org.deuce.transaction.tl2.Context"/>
-			<param name="exclude" value=""/>
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce.jar${path.separator}${basedir}/bin/deuceAgent.jar"/>
+			<param name="exclude" value="org/deuce/utest/jvstm/**/*.class"/>
+			<param name="delegator" value="org.deuce.transaction.capmem.ContextDelegatorCapturedState"/> <!-- This is the delegator responsible for the captured memory analysis -->
+			<param name="capmem" value="-Dorg.deuce.capmem=full"/> <!-- activate the captured memory analysis for all transactional objects, including arrays-->
+		</antcall>
+		<antcall target="junits">
+			<param name="sysprop" value="org.deuce.transaction.contextClass"/>
+			<param name="value" value="org.deuce.transaction.lsa.Context"/>
+			<param name="exclude" value="org/deuce/utest/basic/IrrevocableContextTest.class"/>
+			<param name="delegator" value="org.deuce.transaction.capmem.ContextDelegatorCapturedState"/> <!-- This is the delegator responsible for the captured memory analysis -->
+			<param name="capmem" value="-Dorg.deuce.capmem=full"/> <!-- activate the captured memory analysis for all transactional objects, including arrays-->
 		</antcall>
 		<antcall target="junits">
 			<param name="sysprop" value="org.deuce.transaction.contextClass"/>
 			<param name="value" value="org.deuce.transaction.tl2cm.Context"/>
 			<param name="exclude" value="org/deuce/utest/basic/IrrevocableContextTest.class"/>
 		</antcall>
-		<antcall target="junits">
-			<param name="sysprop" value="org.deuce.transaction.contextClass"/>
-			<param name="value" value="org.deuce.transaction.lsa.Context"/>
-			<param name="exclude" value="org/deuce/utest/basic/IrrevocableContextTest.class"/>
-		</antcall>
+    <antcall target="junits">
+      <param name="sysprop" value="org.deuce.transaction.contextClass"/>
+      <param name="value" value="org.deuce.transaction.norec.Context"/>
+      <param name="exclude" value="org/deuce/utest/basic/IrrevocableContextTest.class"/>
+    </antcall>
 		<antcall target="junits">
 			<param name="sysprop" value="org.deuce.transaction.global"/>
 			<param name="value" value="true"/>
@@ -61,10 +74,16 @@
 		<echo message="Test ${sysprop}=${value}"/>
 		<junit fork="yes">
 			<jvmarg value="-javaagent:${basedir}/bin/deuceAgent.jar"/>
+			<jvmarg value="${jvm.rt}"/>
+			<sysproperty key="org.deuce.delegator" value="${delegator}"/>
+			<jvmarg value="${capmem}"/>
+			<sysproperty key="jvstm.aom.reversion" value="true"/>
+			<sysproperty key="org.deuce.exclude" value="jvstm.*,org.deuce.utest.capmem.AvoidBarriers,java.lang.String,java.lang.StringBuilder,java.lang.Class,java.lang.reflect.Field,java.util.concurrent.atomic.AtomicInteger,org.apache.tools.ant.*,sun.reflect.*"/>
+			<sysproperty key="java.util.logging.config.file" value="${basedir}/config/logging-tests.properties"/>
 			<sysproperty key="${sysprop}" value="${value}"/>
 			<formatter type="xml"/>
 			<formatter type="brief" usefile="false"/>
-			<classpath path="${basedir}/lib/junit.jar:${basedir}/bin/tests"/>
+			<classpath path="${basedir}/lib/junit.jar:${basedir}/lib/jvstm-2.0.jar:${basedir}/bin/tests"/>
 			<batchTest todir="${basedir}/bin/junit">
 				<fileset dir="${basedir}/bin/tests" 
 					includes="org/deuce/utest/**/*Test.class"
@@ -77,6 +96,7 @@
 		<mkdir dir="bin/classes"/>
 		<javac fork="true" srcdir="src"  source="1.6" target="1.6"
 			destdir="bin/classes"
+			classpath="lib/jvstm-2.0.jar"
 		 	includes="java/**"
 			excludes="test/**"
 			debug="true"
@@ -87,10 +107,84 @@
 		<mkdir dir="bin/tests"/>
 		<javac fork="true" srcdir="src" source="1.6" target="1.6"
 			destdir="bin/tests"
-			classpath="bin/classes;lib/junit.jar"
+			classpath="bin/classes;lib/junit.jar;lib/jwormbench.jar;lib/jvstm-2.0.jar"
 		 	includes="test/**"
 			excludes="java/**"
 			debug="true"
 		/>
 	</target>
+	
+  <!--++++++++++ Instrument JAVA runtime - rt.jar ++++++++++-->
+
+  <target name="instrument-rt" depends="-rt-lib,agent-jar" description="Instrument the runtime classes">
+    <antcall target="-run-agent-on-rt">
+      <param name="outfile" value="rt-deuce.jar"/>
+      <param name="capmem" value=""/>
+      <param name="delegator" value=""/>
+    	<param name="exclude" value="com.sun.org.apache.*"/>
+    </antcall>
+    <antcall target="-no-rt"/>
+  </target>
+
+  <target name="instrument-rt-jvstm" depends="-rt-lib,agent-jar" description="Instrument the runtime classes with JVSTM support.">
+    <antcall target="-run-agent-on-rt">
+      <param name="outfile" value="rt-deuce-jvstm.jar"/>
+      <param name="capmem" value=""/>
+      <param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator"/>
+    	<param name="trxClasses" value="java.util.*,sun.security.util.*,"/>
+    	<param name="notTrx" value="java.util.Vector,java.util.zip.*"/>
+    	<param name="exclude" value="java.lang.System,java.util.Locale,sun.misc.VM,java.util.concurrent.atomic.*"/>
+    </antcall>
+    <antcall target="-no-rt"/>
+  </target>
+	
+  <target name="instrument-rt-capmem" depends="-rt-lib,agent-jar" description="Instrument the runtime classes">
+    <antcall target="-run-agent-on-rt">
+      <param name="outfile" value="rt-deuce-capmem.jar"/>
+      <param name="capmem" value=""/>
+      <param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState"/>
+    	<param name="exclude" value="com.sun.org.apache.*"/>
+    </antcall>
+    <antcall target="-no-rt"/>
+  </target>
+	
+  <target name="instrument-rt-capmem-full" depends="-rt-lib,agent-jar" description="Instrument the runtime classes">
+    <antcall target="-run-agent-on-rt">
+    	<param name="outfile" value="rt-deuce-capmem-full.jar"/>
+    	<param name="capmem" value="-Dorg.deuce.capmem=full"/>
+    	<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState"/>
+    	<param name="exclude" value="com.sun.org.apache.*"/>
+  	</antcall>
+    <antcall target="-no-rt"/>
+  </target>
+
+	<!--++++++++++ Instrument JAVA runtime - rt.jar ++++++++++-->
+	
+  <target name="-run-agent-on-rt" if="rt.present">
+    <property environment="env"/>
+    <java fork="true" classname="org.deuce.transform.asm.Agent">
+      <classpath>
+        <pathelement location="${basedir}/bin/deuceAgent.jar"/>
+      	<pathelement location="${basedir}/lib/jvstm-2.0.jar"/>
+      </classpath>
+      <jvmarg value="${delegator}"/>
+    	<jvmarg value="${capmem}"/>
+    	<sysproperty key="org.deuce.transform.jvstm.trxClasses" value="${trxClasses}"/>
+    	<sysproperty key="org.deuce.transform.jvstm.notTrx" value="${notTrx}"/>
+      <sysproperty key="org.deuce.exclude" value="${exclude}"/>
+      <arg line="'${env.JAVA_HOME}/jre/lib/rt.jar' lib/${outfile}" />
+    </java>
+  </target>
+  
+  <target name="-no-rt" unless="rt.present">
+    <property environment="env"/>
+    <fail message="rt.jar not found in libs dir: ${env.JAVA_HOME}/"/>
+  </target>
+
+  <target name="-rt-lib">
+    <property environment="env"/>
+  	<echo message="************* ${env.JAVA_HOME}"/>
+    <available file="${env.JAVA_HOME}/jre/lib/rt.jar" property="rt.present"/>
+  </target>
+	
 </project>

@@ -66,6 +66,7 @@ public class ParallelAbortTest extends TestCase {
 			return count;
 		}
 
+		@Atomic
 		public int getValue() {
 			return count;
 		}

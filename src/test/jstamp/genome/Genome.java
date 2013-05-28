@@ -81,7 +81,7 @@ public class Genome extends Thread {
     Barrier.enterBarrier();
   }
 
-  public static void main(String x[]){
+  public static void main(String x[]) throws InterruptedException{
 
     System.out.print("Creating gene and segments... ");
     Genome g = new Genome(x);
@@ -100,20 +100,22 @@ public class Genome extends Thread {
     ByteString gene = g.genePtr.contents;
     Genome[] gn = new Genome[g.numThread];
 
-    for(int i = 1; i<g.numThread; i++) {
+    for(int i = 0; i<g.numThread; i++) {
       gn[i] = new Genome(i, g.geneLength, g.segmentLength, g.minNumSegment, g.numThread, g.randomPtr, g.genePtr, g.segmentsPtr, g.sequencerPtr);
     }
 
-    System.out.print("Sequencing gene... ");    
+    System.out.println("Sequencing gene... ");    
 
-    for(int i = 1; i<g.numThread; i++) {
+    long start=System.currentTimeMillis();
+    
+    for(int i = 0; i<g.numThread; i++) {
       gn[i].start();
     }
-    
-    long start=System.currentTimeMillis();
-    Barrier.enterBarrier();
-    Sequencer.run(0, g.numThread, g.randomPtr, g.sequencerPtr); 
-    Barrier.enterBarrier();
+
+    for(int i = 0; i<g.numThread; i++) {
+        gn[i].join();
+      }
+
     long stop=System.currentTimeMillis();
     long diff=stop-start;
     System.out.println("TIME="+diff);

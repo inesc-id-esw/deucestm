@@ -13,14 +13,14 @@ public class StaticFieldInheritanceTest extends TestCase {
 		
 		
 		atomicMethodA(b);
-		Assert.assertEquals( 2, b.a);
+		Assert.assertEquals( 2, B.a);
 		
 		atomicMethodB(b);
-		Assert.assertEquals( 3, b.a);
+		Assert.assertEquals( 3, B.a);
 		
 		atomicMethodB(b);
-		Assert.assertEquals( 3, b.a);
-		Assert.assertEquals( 4, b.b);
+		Assert.assertEquals( 3, B.a);
+		Assert.assertEquals( 4, B.b);
 		
 	}
 	

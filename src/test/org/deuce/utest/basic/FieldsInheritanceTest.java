@@ -18,11 +18,11 @@ public class FieldsInheritanceTest extends TestCase{
 		
 		
 		atomicMethodA(b);
-		Assert.assertEquals( 2, b.a);
+		Assert.assertEquals( 2, b.a());
 		
 		atomicMethodB(b);
-		Assert.assertEquals( 3, b.a);
-		Assert.assertEquals( 4, b.b);
+		Assert.assertEquals( 3, b.a());
+		Assert.assertEquals( 4, b.b());
 		
 	}
 	
@@ -39,10 +39,18 @@ public class FieldsInheritanceTest extends TestCase{
 	
 	private static class A{
 		public int a;
+		/*
+	         * The JVSTM does not store transactional fields in place and 
+	         * therefore we should read through STM barriers to get 
+	         * consistent values. 
+	         */
+	        @Atomic int a(){return a;}
+
 	}
 	
 	private static class B extends A{
 		public int b;
+		@Atomic int b(){return b;}
 	}
 }
 
