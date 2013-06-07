@@ -123,6 +123,7 @@ public class Benchmark {
     				String optionValue = args[argNumber++];
     				if(currentArg.equals("-t")) Parameters.numThreads = Integer.parseInt(optionValue);
     				else if(currentArg.equals("-l")) Parameters.numSeconds = Integer.parseInt(optionValue);
+    				else if(currentArg.equals("-warmup")) Parameters.warmUp = Integer.parseInt(optionValue);
     				else if(currentArg.equals("-w")) workload = optionValue;
     				else if(currentArg.equals("-g")) synchType = optionValue;
     				else if(currentArg.equals("-s")) stmInitializerClassName = optionValue;
@@ -218,6 +219,7 @@ public class Benchmark {
     	
     	System.out.println("Number of threads: " + Parameters.numThreads + "\n" +
     			"Length: " + Parameters.numSeconds + " s\n" +
+    			"Warm Up: " + Parameters.warmUp + " s\n" +
     			"Workload: " + Parameters.workloadType + "\n" +
     			"Synchronization method: " + Parameters.synchronizationType + "\n" +
     			"Long traversals " + (Parameters.longTraversalsEnabled ? "enabled" : "disabled") + "\n" +
@@ -299,16 +301,18 @@ public class Benchmark {
     
     private void setupStructures() throws InterruptedException {
     	System.err.println("Setup start...");
-     	setup = new Setup();    			
-    	
-    	benchThreads = new BenchThread[Parameters.numThreads];
-    	threads = new Thread[Parameters.numThreads];
-    	for(short threadNum = 0; threadNum < Parameters.numThreads; threadNum++) {
+     	setup = new Setup();
+    	System.err.println("Setup completed.");
+    }
+    
+    private void setupThreads(int maxThreads) throws InterruptedException {
+    	benchThreads = new BenchThread[maxThreads];
+    	threads = new Thread[maxThreads];
+    	for(short threadNum = 0; threadNum < maxThreads; threadNum++) {
     		benchThreads[threadNum] = 
     			new BenchThread(setup, operationCDF, threadNum);
     		threads[threadNum] = ThreadFactory.instance.createThread(benchThreads[threadNum]);
     	}
-    	System.err.println("Setup completed.");
     }
 
     private void checkInvariants(boolean initial) throws InterruptedException {
@@ -338,6 +342,22 @@ public class Benchmark {
     }
     
     private void start() throws InterruptedException {
+        /*
+         * WarmUp
+         */
+        setupThreads(1);
+        if(Parameters.warmUp != 0){
+            System.err.println("\nWarm-up started.");
+            for(Thread thread : threads) thread.start();
+            Thread.sleep(Parameters.warmUp * 1000);
+            for(BenchThread thread : benchThreads) thread.stopThread();
+            for(Thread thread : threads) thread.join();
+            System.err.println("\nWarm-up completed.\n");
+        }
+        /*
+         * Run benchmark.
+         */
+        setupThreads(Parameters.numThreads);
     	System.err.println("\nBenchmark started.");
     	ThreadRandom.startConcurrentPhase();
     	
