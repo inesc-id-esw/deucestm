@@ -3,12 +3,12 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import jwormbench.core.ICoordinate;
-import jwormbench.core.INode;
 import jwormbench.core.IWorld;
 import jwormbench.core.WormBench;
 import jwormbench.defaults.DefaultCoordinateFactory;
+import jwormbench.defaults.DefaultNodeFactory;
 import jwormbench.defaults.DefaultOperationFactory;
+import jwormbench.defaults.DefaultStepFactory;
 import jwormbench.defaults.DefaultWormFactory;
 import jwormbench.defaults.World;
 import jwormbench.factories.ICoordinateFactory;
@@ -20,18 +20,18 @@ import jwormbench.setup.StepsFileLoader;
 import jwormbench.setup.WorldFileLoader;
 import jwormbench.setup.WormsFileLoader;
 
-import org.deuce.Atomic;
 import org.deuce.transform.Exclude;
 
 @Exclude
-class LogFormatter extends Formatter{
-	public String format(LogRecord record) {
-		return record.getMessage();
+public class SyncNone{
+	
+	@Exclude
+	static class LogFormatter extends Formatter{
+		public String format(LogRecord record) {
+			return record.getMessage();
+		}
 	}
-}
 
-@Exclude
-public class SyncModuleDeuce{
 	private static Logger logger;
 	public static WormBench configure(int nrOfIterations, int nrOfThreads, int timeOut,
 			String configWorms, String configWorld, String configOperations) {
@@ -39,22 +39,10 @@ public class SyncModuleDeuce{
 		// World
 		//
 		final ICoordinateFactory cordFac =  new DefaultCoordinateFactory();
-		final INodeFactory nodeFac = new DeuceNodeFactory();
+		final INodeFactory nodeFac = new DefaultNodeFactory();
 		final IWorld world = new World(
 				new WorldFileLoader(
-						configWorld, nodeFac)){
-			@Override
-			@Atomic
-			public INode getNode(ICoordinate c) {
-				return super.getNode(c);
-			}
-			
-			@Override
-			@Atomic
-			public INode getNode(int x, int y) {
-				return super.getNode(x, y);
-			}
-		};
+						configWorld, nodeFac));
 		//
 		// Worms
 		//
@@ -63,7 +51,7 @@ public class SyncModuleDeuce{
 		//
 		// Steps
 		//
-		final IStepFactory stepsFac = new DeuceStepFactory(
+		final IStepFactory stepsFac = new DefaultStepFactory(
 				new StepsFileLoader(configOperations), 
 				new DefaultOperationFactory(world));
 		logger = Logger.getLogger("");

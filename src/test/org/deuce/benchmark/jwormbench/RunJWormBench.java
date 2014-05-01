@@ -40,10 +40,15 @@ public class RunJWormBench {
 		int nrOfThreads = Integer.parseInt(args[1]);
 		int wRate = Integer.parseInt(args[2]);
 		String sync = args[3];
-		performTest(nrOfIterations, nrOfThreads, wRate, sync);
+		int timeout = args.length >= 5 ? Integer.parseInt(args[4]) : 60; 
+		performTest(nrOfIterations, nrOfThreads, wRate, sync, timeout);
 	}
 
 	public static WormBench performTest(int nrOfIterations, int nrOfThreads, int wRate, String sync) throws InterruptedException{
+		return performTest(nrOfIterations, nrOfThreads, wRate, sync, 60);
+	}
+	
+	public static WormBench performTest(int nrOfIterations, int nrOfThreads, int wRate, String sync, int timeout) throws InterruptedException{
 		final String configWorms = String.format(WORMS_FILENAME_PATTERN, headSize, worldSize);
 		final String configWorld= String.format(WORLD_FILENAME_PATTERN, worldSize);
 		final String configOperations = String.format(OPERATIONS_FILENAME_PATTERN, nrOperations, wRate);
@@ -57,24 +62,30 @@ public class RunJWormBench {
 			benchRollout = SyncModuleDeuce.configure(
 					nrOfIterations,
 					nrOfThreads,
-					60, //timeout
+					timeout, //timeout
 					configWorms,
 					configWorld,
 					configOperations);
 			logger = SyncModuleDeuce.getLogger();
 		}
+		else if(sync.equals("none")){
+			benchRollout = SyncNone.configure( nrOfIterations, nrOfThreads, timeout, configWorms, configWorld, configOperations);
+			logger = SyncNone.getLogger();
+		}
 		else if(sync.equals("coarse")){
-			benchRollout = SyncModuleCoarseLock.configure( nrOfIterations, nrOfThreads, 60, configWorms, configWorld, configOperations);
+			benchRollout = SyncModuleCoarseLock.configure( nrOfIterations, nrOfThreads, timeout, configWorms, configWorld, configOperations);
 			logger = SyncModuleCoarseLock.getLogger();
 		}
 		else if(sync.equals("fine")){
-			benchRollout = SyncModuleFineLock.configure( nrOfIterations, nrOfThreads, 60, configWorms, configWorld, configOperations);
+			benchRollout = SyncModuleFineLock.configure( nrOfIterations, nrOfThreads, timeout, configWorms, configWorld, configOperations);
 			logger = SyncModuleFineLock.getLogger();
+		} else {
+			throw new IllegalArgumentException("No synchronization defined for argument " + sync);
 		}
 
 		IWorld world = benchRollout.world;
 		logger.info("-----------------------------------------------------" + NEW_LINE);
-		String syncStat = getStm() + "; wrate = " + wRate;
+		String syncStat = sync.equals("deuce")? getStm() + "; wrate = " + wRate : sync + "; wrate = " + wRate ;
 		//
 		// WarmUp 
 		//
