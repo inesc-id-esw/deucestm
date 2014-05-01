@@ -39,7 +39,7 @@
 	<target name="bench-nocap-bench7" depends="instrument-rt">
 		<antcall target="-bench-bench7">
 			<param name="stm" value="org.deuce.transaction.lsa.Context" />
-			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce.jar${path.separator}${basedir}/bin/deuceAgent.jar" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce.jar${path.separator}${basedir}/bin/deucestm-licm-1.3.0.jar" />
 			<param name="delegator" value="" />
 			<param name="capmem" value="" />
 		</antcall>
@@ -93,7 +93,7 @@
 	<target name="bench-nocap-genome" depends="instrument-rt">
 		<antcall target="-bench-genome">
 			<param name="stm" value="org.deuce.transaction.lsa.Context" />
-			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce.jar${path.separator}${basedir}/bin/deuceAgent.jar" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce.jar${path.separator}${basedir}/bin/deucestm-licm-1.3.0.jar" />
 			<param name="delegator" value="" />
 			<param name="capmem" value="" />
 		</antcall>
@@ -104,7 +104,7 @@
 	<target name="bench-capmem-bench7" depends="instrument-rt-capmem-full">
 		<antcall target="-bench-bench7">
 			<param name="stm" value="org.deuce.transaction.lsa.Context" />
-			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-capmem-full.jar${path.separator}${basedir}/bin/deuceAgent.jar" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-capmem-full.jar${path.separator}${basedir}/bin/deucestm-licm-1.3.0.jar" />
 			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
 			<param name="capmem" value="-Dorg.deuce.capmem=full" />
 		</antcall>
@@ -158,7 +158,7 @@
 	<target name="bench-capmem-genome" depends="instrument-rt-capmem-full">
 		<antcall target="-bench-genome">
 			<param name="stm" value="org.deuce.transaction.lsa.Context" />
-			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-capmem-full.jar${path.separator}${basedir}/bin/deuceAgent.jar" />
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-capmem-full.jar${path.separator}${basedir}/bin/deucestm-licm-1.3.0.jar" />
 			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.capmem.ContextDelegatorCapturedState" />
 			<param name="capmem" value="-Dorg.deuce.capmem=full" />
 		</antcall>
@@ -166,10 +166,10 @@
 	
 	<!--++++ Deuce with JVSTM and Captured Memory Analysis support  ++++-->
 
-	<target name="bench-jvstm-bench7" depends="instrument-rt-jvstm">
+	<target name="bench-jvstm-bench7" depends="">
 		<antcall target="-bench-bench7">
 			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
-			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-jvstm.jar${path.separator}${basedir}/bin/deuceAgent.jar${path.separator}${basedir}/lib/jvstm-2.0.jar"/>
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-jvstm.jar${path.separator}${basedir}/bin/deucestm-licm-1.3.0.jar${path.separator}${basedir}/lib/jvstm-2.0.jar"/>
 			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
 			<param name="capmem" value="-Djvstm.capmem=true" />
 		</antcall>
@@ -223,7 +223,7 @@
 	<target name="bench-jvstm-genome" depends="instrument-rt-jvstm">
 		<antcall target="-bench-genome">
 			<param name="stm" value="org.deuce.transaction.jvstm.Context" />
-			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-jvstm.jar${path.separator}${basedir}/bin/deuceAgent.jar${path.separator}${basedir}/lib/jvstm-2.0.jar"/>
+			<param name="jvm.rt" value="-Xbootclasspath:${basedir}/lib/rt-deuce-jvstm.jar${path.separator}${basedir}/bin/deucestm-licm-1.3.0.jar${path.separator}${basedir}/lib/jvstm-2.0.jar"/>
 			<param name="delegator" value="-Dorg.deuce.delegator=org.deuce.transaction.jvstm.ContextDelegator" />
 			<param name="capmem" value="-Djvstm.capmem=true" />
 		</antcall>
@@ -314,7 +314,7 @@
 			<jvmarg value="${jvm.rt}" />
 			<jvmarg value="${jvm.mem}" />
 			<jvmarg value="-ea" />
-			<jvmarg value="-javaagent:${basedir}/bin/deuceAgent.jar" />
+			<jvmarg value="-javaagent:${basedir}/bin/deucestm-licm-1.3.0.jar" />
 			<sysproperty key="org.deuce.transaction.contextClass" value="${stm}" />
 			<sysproperty key="org.deuce.exclude" value="${exclude}" />
 			<sysproperty key="java.util.logging.config.file" value="${basedir}/config/logging-tests.properties"/>
