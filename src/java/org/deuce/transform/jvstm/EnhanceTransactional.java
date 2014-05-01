@@ -327,21 +327,24 @@ public class EnhanceTransactional extends ClassAdapter implements ClassEnhancer,
 	    mv.visitVarInsn(ASTORE, 1);
 	    //
 	    // The header object has 12 bytes and the first field starts at offset 12. 
-	    // So we first copy one word of 4 bytes and after that we will copy words of 8 bytes,
+	    // Yet, we do not want to copy the first two fields corresponding to the fields
+	    // inherited from the VBoxAom class: body and inplace. 
+	    // So we will start copying from the offset 20 henceforward.
+	    // First we will copy one word of 4 bytes and after that we will copy words of 8 bytes,
 	    // because we are running in a 64 bits architecture and all objects are multiples of 8 bytes.
 	    //
 	    /* 1st arg of putLong = Unsafe object     */ mv.visitFieldInsn(GETSTATIC, "jvstm/UtilUnsafe", "UNSAFE", "Lsun/misc/Unsafe;");
 	    /* 2nd arg of putLong = className object  */ mv.visitVarInsn(ALOAD, 1);
-	    /* 3rd arg of putLong = offset            */ mv.visitLdcInsn(12L);
+	    /* 3rd arg of putLong = offset            */ mv.visitLdcInsn(20L);
 	    /* 1st arg of getLong = Unsafe object     */ mv.visitFieldInsn(GETSTATIC, "jvstm/UtilUnsafe", "UNSAFE", "Lsun/misc/Unsafe;");
 	    /* 2nd arg of getLong = this              */ mv.visitVarInsn(ALOAD, 0);
-	    /* 3rd arg of getLong = offset            */ mv.visitLdcInsn(12L);
+	    /* 3rd arg of getLong = offset            */ mv.visitLdcInsn(20L);
 	    /* 4th arg of putLong = result of getLong */ mv.visitMethodInsn(INVOKEVIRTUAL, "sun/misc/Unsafe", "getInt", "(Ljava/lang/Object;J)I");
 	    /*                                        */ mv.visitMethodInsn(INVOKEVIRTUAL, "sun/misc/Unsafe", "putInt", "(Ljava/lang/Object;JI)V");
 	    //
 	    // Performs the loop copying word by word.
 	    // 
-	    mv.visitLdcInsn(new Long(16L));
+	    mv.visitLdcInsn(new Long(24L));
 	    mv.visitVarInsn(LSTORE, 3);
 	    Label l3 = new Label();
 	    mv.visitLabel(l3);
