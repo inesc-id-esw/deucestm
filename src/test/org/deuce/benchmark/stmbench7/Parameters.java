@@ -101,7 +101,8 @@ public class Parameters {
     public static WorkloadType workloadType = WorkloadType.READ_DOMINATED;
     public static SynchronizationType synchronizationType = SynchronizationType.LOCK_COARSE;
     public static int numThreads = 1, 
-    	numSeconds = 10;
+    	numSeconds = 10,
+    	warmUp = 0;
     public static boolean longTraversalsEnabled = true,
     	structureModificationEnabled = true,
     	sequentialReplayEnabled = false;
